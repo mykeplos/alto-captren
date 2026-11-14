@@ -2,6 +2,7 @@
 import HeroArt from './HeroArt.astro';
 import { cabanas, clp, precioDesde } from '../data/cabanas';
 import type { Lang } from '../i18n/ui';
+import { url } from '../lib/url';
 
 interface Props {
   lang: Lang;
@@ -34,6 +35,7 @@ const textos = {
     dormitorios: 'dormitorios',
     bano: 'baño',
     porNoche: 'por noche',
+    verDetalle: 'Ver fotos, camas y precios',
     temporadaTitulo: 'Para todo el año',
     temporadaTexto:
       'Verano de lagos y senderos, o invierno con nieve. En temporada alta (diciembre a febrero, julio, agosto y fines de semana largos) la estadía mínima es de 2 noches.',
@@ -69,6 +71,7 @@ const textos = {
     dormitorios: 'bedrooms',
     bano: 'bathroom',
     porNoche: 'per night',
+    verDetalle: 'See photos, beds and rates',
     temporadaTitulo: 'All year round',
     temporadaTexto:
       'Summer lakes and trails, or a snowy winter. In high season (December to February, July, August and long weekends) the minimum stay is 2 nights.',
@@ -133,13 +136,16 @@ const textos = {
               👥 {c.capacidad} {textos.personas} · 🛏️ {c.dormitorios} {textos.dormitorios} · 🚿 {c.banos} {textos.bano}
             </p>
             <ul class="camas">
-              {c.camas[lang].map((cama) => (
-                <li>{cama}</li>
+              {c.piezas.map((p) => (
+                <li>{p[lang]}</li>
               ))}
             </ul>
             <p class="precio">
               {textos.desde} <strong>{clp(c.precio.baja)}</strong> {textos.porNoche}
             </p>
+            <a class="ver-mas" href={url(`${lang}/cabanas/#${c.id}`)}>
+              {textos.verDetalle} →
+            </a>
           </div>
         </article>
       ))
@@ -301,7 +307,11 @@ const textos = {
   }
 
   .precio {
-    margin: 0;
+    margin: 0 0 0.6rem;
+  }
+
+  .ver-mas {
+    font-weight: 600;
   }
 
   .precio strong {
