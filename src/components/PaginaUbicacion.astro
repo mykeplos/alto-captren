@@ -1,0 +1,179 @@
+---
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+// TODO(#6): reemplazar por la ubicación exacta de las cabañas cuando el dueño comparta el pin de Google Maps.
+const consultaMapa = 'Captrén, Curacautín, Araucanía, Chile';
+const mapa = `https://maps.google.com/maps?q=${encodeURIComponent(consultaMapa)}&z=11&output=embed`;
+const abrirMapa = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(consultaMapa)}`;
+
+const textos = {
+  es: {
+    titulo: 'Ubicación y cómo llegar',
+    intro:
+      'Estamos en el sector Captren, en el camino de Curacautín al Parque Nacional Conguillío (ruta R-925-S), Región de La Araucanía. La entrada Captren del parque queda a unos 10 minutos.',
+    abrirMapa: 'Abrir en Google Maps',
+    mapaTitulo: 'Mapa del sector Captren',
+    rutasTitulo: 'Cómo llegar',
+    rutas: [
+      ['Desde Curacautín', 'Unos 20 km por la ruta R-925-S hacia Conguillío (sector Captren). Parte del camino es de ripio. Aprox. 30 minutos.'],
+      ['Desde Temuco', 'Por Lautaro y Curacautín. Aprox. 1 h 45 min.'],
+      ['Desde Santiago', 'Ruta 5 Sur hasta Victoria, luego ruta 181 a Curacautín. Aprox. 8 horas.'],
+      ['En avión o bus', 'El aeropuerto más cercano es el de Temuco. Hay buses de Temuco y Victoria a Curacautín.'],
+    ],
+    inviernoTitulo: '❄️ Si vienes en invierno',
+    invierno: [
+      'Lleva cadenas: el camino puede tener nieve o hielo.',
+      'Recomendamos vehículo 4×4 o con buena tracción.',
+      'Escríbenos antes de salir y te contamos cómo está el camino.',
+    ],
+    compras:
+      'Te recomendamos hacer las compras en Curacautín (supermercado, farmacia y bencinera) antes de subir.',
+    nota: 'Tiempos aproximados en auto; pueden variar según el clima y el estado del camino.',
+  },
+  en: {
+    titulo: 'Location & getting here',
+    intro:
+      'We are in the Captren area, on the road from Curacautín to Conguillío National Park (route R-925-S), Araucanía Region, Chile. The park’s Captren entrance is about 10 minutes away.',
+    abrirMapa: 'Open in Google Maps',
+    mapaTitulo: 'Map of the Captren area',
+    rutasTitulo: 'Getting here',
+    rutas: [
+      ['From Curacautín', 'About 20 km along route R-925-S towards Conguillío (Captren sector). Part of the road is gravel. Approx. 30 minutes.'],
+      ['From Temuco', 'Via Lautaro and Curacautín. Approx. 1 h 45 min.'],
+      ['From Santiago', 'Route 5 South to Victoria, then route 181 to Curacautín. Approx. 8 hours.'],
+      ['By plane or bus', 'The nearest airport is Temuco. Buses run from Temuco and Victoria to Curacautín.'],
+    ],
+    inviernoTitulo: '❄️ Coming in winter',
+    invierno: [
+      'Bring snow chains: the road may have snow or ice.',
+      'We recommend a 4×4 or a vehicle with good traction.',
+      'Message us before you leave and we will tell you about road conditions.',
+    ],
+    compras:
+      'We recommend doing your shopping in Curacautín (supermarket, pharmacy and petrol station) on your way up.',
+    nota: 'Approximate driving times; they may vary with weather and road conditions.',
+  },
+}[lang];
+---
+
+<section class="container pagina">
+  <h1>{textos.titulo}</h1>
+  <p class="intro">{textos.intro}</p>
+
+  <div class="mapa">
+    <iframe
+      src={mapa}
+      title={textos.mapaTitulo}
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"
+      allowfullscreen></iframe>
+  </div>
+  <p><a class="btn" href={abrirMapa} target="_blank" rel="noopener">{textos.abrirMapa}</a></p>
+
+  <h2>{textos.rutasTitulo}</h2>
+  <dl class="rutas">
+    {
+      textos.rutas.map(([desde, como]) => (
+        <div>
+          <dt>{desde}</dt>
+          <dd>{como}</dd>
+        </div>
+      ))
+    }
+  </dl>
+
+  <div class="invierno">
+    <h2>{textos.inviernoTitulo}</h2>
+    <ul>
+      {textos.invierno.map((linea) => <li>{linea}</li>)}
+    </ul>
+  </div>
+
+  <p>🛒 {textos.compras}</p>
+  <p class="nota">{textos.nota}</p>
+</section>
+
+<style>
+  .pagina {
+    padding-top: 2.5rem;
+    max-width: 52rem;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 6vw, 2.8rem);
+    margin: 0 0 0.6rem;
+  }
+
+  h2 {
+    margin-top: 2.2rem;
+  }
+
+  .intro {
+    color: var(--texto-suave);
+  }
+
+  .mapa {
+    aspect-ratio: 4 / 3;
+    border-radius: var(--radio);
+    overflow: hidden;
+    box-shadow: var(--sombra);
+    background: var(--crema);
+  }
+
+  @media (min-width: 700px) {
+    .mapa {
+      aspect-ratio: 16 / 9;
+    }
+  }
+
+  .mapa iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  .rutas {
+    display: grid;
+    gap: 0.8rem;
+    margin: 0;
+  }
+
+  .rutas div {
+    padding: 0.9rem 1.1rem;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: var(--sombra);
+  }
+
+  .rutas dt {
+    font-weight: 700;
+    color: var(--bosque);
+  }
+
+  .rutas dd {
+    margin: 0.2rem 0 0;
+  }
+
+  .invierno {
+    margin-top: 2rem;
+    padding: 0.2rem 1.3rem 0.6rem;
+    background: #e6eef2;
+    border-radius: var(--radio);
+  }
+
+  .invierno h2 {
+    margin-top: 1rem;
+    font-size: 1.4rem;
+  }
+
+  .nota {
+    color: var(--texto-suave);
+    font-size: 0.9rem;
+  }
+</style>
