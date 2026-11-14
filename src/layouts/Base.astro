@@ -1,0 +1,69 @@
+---
+import '../styles/global.css';
+import { otherLang, useTranslations, type Lang } from '../i18n/ui';
+import { url } from '../lib/url';
+
+interface Props {
+  lang: Lang;
+  title?: string;
+  description?: string;
+  /** Ruta de esta página sin el idioma, ej. '' o 'cabanas/'. Sirve para el botón ES / EN. */
+  path?: string;
+}
+
+const { lang, title, description, path = '' } = Astro.props;
+const t = useTranslations(lang);
+const other = otherLang(lang);
+const pageTitle = title ? `${title} · ${t('site.name')}` : `${t('site.name')} · ${t('site.tagline')}`;
+const pageDescription = description ?? t('site.description');
+const home = url(`${lang}/`);
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={pageDescription} />
+    <link rel="icon" type="image/svg+xml" href={url('favicon.svg')} />
+    <link rel="alternate" hreflang={lang} href={new URL(url(`${lang}/${path}`), Astro.site)} />
+    <link rel="alternate" hreflang={other} href={new URL(url(`${other}/${path}`), Astro.site)} />
+    <meta name="theme-color" content="#1f3a2e" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container header-inner">
+        <a class="brand" href={home}>
+          <img src={url('favicon.svg')} alt="" width="32" height="32" />
+          <span>{t('site.name')}</span>
+        </a>
+        <nav aria-label={t('nav.menu')}>
+          <ul class="nav-list">
+            <li><a href={home}>{t('nav.home')}</a></li>
+            <li><a href={`${home}#cabanas`}>{t('nav.cabins')}</a></li>
+            <li><a href="#contacto">{t('nav.contact')}</a></li>
+          </ul>
+        </nav>
+        <a class="lang-switch" href={url(`${other}/${path}`)} hreflang={other} lang={other}>
+          {other.toUpperCase()}
+          <span class="sr-only">{t('lang.switch')}</span>
+        </a>
+      </div>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="site-footer" id="contacto">
+      <div class="container">
+        <p class="footer-name">{t('site.name')}</p>
+        <p>{t('footer.location')}</p>
+        <p>{t('footer.contact')}</p>
+        <p class="footer-small">© {year} {t('site.name')}. {t('footer.rights')}</p>
+      </div>
+    </footer>
+  </body>
+</html>
