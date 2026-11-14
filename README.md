@@ -19,3 +19,19 @@ Sitio web para arrendar las cabañas **Alto Captren**, en Captren (Curacautín, 
 ## Forma de trabajo
 
 Una rama + PR por tarea, con `Closes #N`. Se une a `main` solo con OK y la revisión automática en verde.
+
+## Probar en tu PC
+
+```bash
+npm install
+npm run dev
+```
+
+Abre http://localhost:4321/alto-captren/ en el navegador.
+
+- `npm run check`: revisa errores de tipos.
+- `npm run build`: construye el sitio en la carpeta `dist/`.
+
+## Publicación
+
+Al unir un PR a `main`, GitHub Actions publica el sitio en https://mykeplos.github.io/alto-captren/
