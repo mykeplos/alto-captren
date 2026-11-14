@@ -23,6 +23,11 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Que el encabezado fijo no tape el título al saltar a una sección */
+[id] {
+  scroll-margin-top: 72px;
+}
+
 body {
   margin: 0;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
