@@ -1,0 +1,24 @@
+---
+// Página raíz: manda al visitante a /es/ o /en/ según el idioma de su navegador.
+import { url } from '../lib/url';
+const es = url('es/');
+const en = url('en/');
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Cabañas Alto Captren</title>
+    <link rel="canonical" href={es} />
+    <script is:inline define:vars={{ es, en }}>
+      var lang = (navigator.language || 'es').toLowerCase();
+      location.replace(lang.startsWith('es') ? es : en);
+    </script>
+    <noscript><meta http-equiv="refresh" content={`0; url=${es}`} /></noscript>
+  </head>
+  <body>
+    <p><a href={es}>Español</a> · <a href={en}>English</a></p>
+  </body>
+</html>
