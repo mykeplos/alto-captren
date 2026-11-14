@@ -22,6 +22,9 @@ const year = new Date().getFullYear();
 const navItems: { label: string; href: string }[] = [
   { label: t('nav.home'), href: home },
   { label: t('nav.cabins'), href: url(`${lang}/cabanas/`) },
+  { label: t('nav.location'), href: url(`${lang}/ubicacion/`) },
+  { label: t('nav.activities'), href: url(`${lang}/actividades/`) },
+  { label: t('nav.faq'), href: url(`${lang}/preguntas/`) },
   { label: t('nav.contact'), href: '#contacto' },
 ];
 const current = Astro.url.pathname;
