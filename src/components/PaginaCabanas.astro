@@ -1,0 +1,273 @@
+---
+import { cabanas, clp, equipamiento, temporadas } from '../data/cabanas';
+import type { Lang } from '../i18n/ui';
+import { url } from '../lib/url';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+const textos = {
+  es: {
+    titulo: 'Nuestras cabañas',
+    intro:
+      'Dos cabañas completas en Captren, con vista al volcán y a 10 minutos del Parque Nacional Conguillío. Las dos tienen el mismo equipamiento; cambia la capacidad y las camas.',
+    personas: 'personas',
+    dormitorios: 'dormitorios',
+    bano: 'baño',
+    pieza: 'Pieza',
+    camas: 'Camas',
+    equipamiento: 'Equipamiento',
+    precios: 'Precios por noche (cabaña completa)',
+    temporada: 'Temporada',
+    reservar: 'Reservar',
+    foto: 'Foto',
+    fotosPronto: 'Fotos reales muy pronto',
+    notaPrecio:
+      'Precios en pesos chilenos. Se reserva con un abono del 50% por transferencia; el resto se paga al llegar.',
+  },
+  en: {
+    titulo: 'Our cabins',
+    intro:
+      'Two private cabins in Captren with volcano views, 10 minutes from Conguillío National Park. Both have the same amenities; they differ in capacity and beds.',
+    personas: 'guests',
+    dormitorios: 'bedrooms',
+    bano: 'bathroom',
+    pieza: 'Bedroom',
+    camas: 'Beds',
+    equipamiento: 'Amenities',
+    precios: 'Nightly rates (whole cabin)',
+    temporada: 'Season',
+    reservar: 'Book now',
+    foto: 'Photo',
+    fotosPronto: 'Real photos coming soon',
+    notaPrecio:
+      'Prices in Chilean pesos (CLP). Bookings are secured with a 50% deposit by bank transfer; the balance is paid on arrival.',
+  },
+}[lang];
+
+const reservar = url(`${lang}/#reservar`);
+---
+
+<section class="container encabezado">
+  <h1>{textos.titulo}</h1>
+  <p class="intro">{textos.intro}</p>
+  <nav class="saltos">
+    {cabanas.map((c) => <a href={`#${c.id}`}>{c.nombre[lang]}</a>)}
+  </nav>
+</section>
+
+{
+  cabanas.map((c) => (
+    <section class="container cabana" id={c.id}>
+      <div class="galeria" aria-label={textos.fotosPronto}>
+        {[1, 2, 3].map((n) => (
+          <div class={`foto foto-${n}`}>
+            <span>
+              {c.nombre[lang]} · {textos.foto} {n}
+            </span>
+          </div>
+        ))}
+      </div>
+      <div class="detalle">
+        <h2>{c.nombre[lang]}</h2>
+        <p class="datos">
+          👥 {c.capacidad} {textos.personas} · 🛏️ {c.dormitorios} {textos.dormitorios} · 🚿 {c.banos} {textos.bano}
+        </p>
+
+        <h3>{textos.camas}</h3>
+        <ul class="piezas">
+          {c.piezas.map((p, i) => (
+            <li>
+              <strong>
+                {textos.pieza} {i + 1}:
+              </strong>{' '}
+              {p[lang]}
+            </li>
+          ))}
+        </ul>
+
+        <h3>{textos.precios}</h3>
+        <table class="precios">
+          <tbody>
+            {temporadas.map((t) => (
+              <tr>
+                <th scope="row">
+                  {t.nombre[lang]}
+                  <small>{t.cuando[lang]}</small>
+                </th>
+                <td>{clp(c.precio[t.id])}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+        <a class="btn" href={reservar}>
+          {textos.reservar} {c.nombre[lang]}
+        </a>
+      </div>
+    </section>
+  ))
+}
+
+<section class="container">
+  <h2>{textos.equipamiento}</h2>
+  <ul class="equipamiento">
+    {
+      equipamiento.map((e) => (
+        <li>
+          <span aria-hidden="true">{e.icono}</span> {e.texto[lang]}
+        </li>
+      ))
+    }
+  </ul>
+  <p class="nota">{textos.notaPrecio}</p>
+</section>
+
+<style>
+  .encabezado {
+    padding-top: 2.5rem;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 6vw, 2.8rem);
+    margin: 0 0 0.6rem;
+  }
+
+  .intro {
+    color: var(--texto-suave);
+    max-width: 46rem;
+  }
+
+  .saltos {
+    display: flex;
+    gap: 0.6rem;
+    flex-wrap: wrap;
+  }
+
+  .saltos a {
+    padding: 0.35rem 0.9rem;
+    border-radius: 999px;
+    background: var(--crema);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .cabana {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    padding: 2.5rem 0;
+    border-bottom: 1px solid var(--crema);
+  }
+
+  @media (min-width: 860px) {
+    .cabana {
+      grid-template-columns: 1.2fr 1fr;
+      align-items: start;
+    }
+  }
+
+  .galeria {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 0.5rem;
+    aspect-ratio: 3 / 2;
+  }
+
+  .foto {
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    color: rgb(255 255 255 / 0.85);
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 0.5rem;
+    background: linear-gradient(135deg, var(--bosque-claro), var(--madera));
+  }
+
+  .foto-1 {
+    grid-row: span 2;
+    font-size: 1.1rem;
+  }
+
+  .foto-2 {
+    background: linear-gradient(135deg, #4c6f5b, #7d8b95);
+  }
+
+  .foto-3 {
+    background: linear-gradient(135deg, var(--madera), #5c3a20);
+  }
+
+  .detalle h2 {
+    font-size: 2rem;
+    margin: 0 0 0.3rem;
+  }
+
+  .detalle h3 {
+    font-size: 1.15rem;
+    margin: 1.3rem 0 0.5rem;
+  }
+
+  .datos {
+    margin: 0;
+    color: var(--texto-suave);
+  }
+
+  .piezas {
+    margin: 0;
+    padding-left: 1.2rem;
+  }
+
+  .precios {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1.4rem;
+  }
+
+  .precios th,
+  .precios td {
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--crema);
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .precios th small {
+    display: block;
+    font-weight: 400;
+    color: var(--texto-suave);
+  }
+
+  .precios td {
+    text-align: right;
+    font-weight: 700;
+    color: var(--madera);
+    font-size: 1.2rem;
+    white-space: nowrap;
+    padding-left: 1rem;
+  }
+
+  .equipamiento {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 0.6rem;
+  }
+
+  .equipamiento li {
+    padding: 0.7rem 0.9rem;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: var(--sombra);
+  }
+
+  .nota {
+    color: var(--texto-suave);
+    font-size: 0.95rem;
+  }
+</style>
