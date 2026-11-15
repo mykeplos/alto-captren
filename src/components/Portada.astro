@@ -10,6 +10,7 @@ import Icon from './Icon.astro';
 import CabanaDatos from './CabanaDatos.astro';
 import Logo from './Logo.astro';
 import GaleriaPortada from './GaleriaPortada.astro';
+import Clima from './Clima.astro';
 
 interface Props {
   lang: Lang;
@@ -285,6 +286,10 @@ const reservar = url(`${lang}/reservar/`);
   </div>
 </section>
 
+<div class="container seccion-clima" data-revelar>
+  <Clima lang={lang} />
+</div>
+
 <GaleriaPortada lang={lang} />
 
 <section class="cta">
@@ -299,6 +304,11 @@ const reservar = url(`${lang}/reservar/`);
 </section>
 
 <style>
+  .seccion-clima {
+    margin-top: clamp(3rem, 6vw, 5rem);
+    margin-bottom: clamp(1.5rem, 4vw, 3rem);
+  }
+
   /* ---------- Portada ---------- */
   .hero {
     position: relative;
