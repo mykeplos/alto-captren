@@ -954,3 +954,23 @@ main > section:first-child:not(.hero):not(.banner) {
     transition: none;
   }
 }
+
+/* Botón de idioma con el mismo estilo de vidrio que el interruptor día/noche */
+.lang-switch {
+  display: inline-grid;
+  place-items: center;
+  min-width: 42px;
+  height: 34px;
+  padding: 0 0.75rem;
+  border: 1px solid rgb(255 255 255 / 0.28);
+  background: rgb(255 255 255 / 0.1);
+  letter-spacing: 0.06em;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.lang-switch:hover {
+  background: rgb(255 255 255 / 0.18);
+  border-color: rgb(255 255 255 / 0.45);
+}
