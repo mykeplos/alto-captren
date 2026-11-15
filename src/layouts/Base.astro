@@ -1,6 +1,7 @@
 ---
 import '@fontsource-variable/inter';
 import '@fontsource-variable/fraunces';
+import '@fontsource-variable/montserrat';
 import '../styles/global.css';
 import Icon from '../components/Icon.astro';
 import IconoMarca from '../components/IconoMarca.astro';
@@ -20,7 +21,7 @@ interface Props {
   encabezadoTransparente?: boolean;
 }
 
-const { lang, title, description, path = '', encabezadoTransparente = false } = Astro.props;
+const { lang, title, description, path = '', encabezadoTransparente = true } = Astro.props;
 const t = useTranslations(lang);
 const other = otherLang(lang);
 const pageTitle = title ? `${title} · ${t('site.name')}` : `${t('site.name')} · ${t('site.tagline')}`;
