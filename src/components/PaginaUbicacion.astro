@@ -84,7 +84,7 @@ const textos = {
   <p><a class="btn" href={abrirMapa} target="_blank" rel="noopener">{textos.abrirMapa}</a></p>
 
   <h2>{textos.rutasTitulo}</h2>
-  <dl class="rutas">
+  <dl class="rutas" data-revelar-grupo>
     {
       textos.rutas.map(([desde, como]) => (
         <div>
@@ -95,7 +95,7 @@ const textos = {
     }
   </dl>
 
-  <div class="invierno">
+  <div class="invierno" data-revelar>
     <h2><Icon name="snowflake" size={24} /> {textos.inviernoTitulo}</h2>
     <ul>
       {textos.invierno.map((linea) => <li>{linea}</li>)}
