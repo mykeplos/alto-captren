@@ -3,6 +3,7 @@ import Banner from './Banner.astro';
 import fotoBanner from '../assets/volcan-camino.jpg';
 import type { Lang } from '../i18n/ui';
 import Icon from './Icon.astro';
+import Clima from './Clima.astro';
 
 interface Props {
   lang: Lang;
@@ -104,6 +105,10 @@ const textos = {
     }
   </dl>
 
+  <div class="clima-caja" data-revelar>
+    <Clima lang={lang} />
+  </div>
+
   <div class="invierno" data-revelar>
     <h2><Icon name="snowflake" size={24} /> {textos.inviernoTitulo}</h2>
     <ul>
@@ -116,6 +121,10 @@ const textos = {
 </section>
 
 <style>
+  .clima-caja {
+    margin: 2.5rem 0;
+  }
+
   .pagina {
     padding-top: 2.5rem;
     max-width: 52rem;
