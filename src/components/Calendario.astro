@@ -1,0 +1,598 @@
+---
+// Calendario de disponibilidad: lee los días ocupados de Google Calendar (un calendario por cabaña).
+// Solo pide a Google las fechas de inicio y fin de cada evento, nunca el título ni los detalles.
+import { cabanas } from '../data/cabanas';
+import type { Lang } from '../i18n/ui';
+import { enlaceWhatsApp } from '../config';
+import Icon from './Icon.astro';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+const clave = import.meta.env.PUBLIC_GOOGLE_API_KEY ?? '';
+const calendarios: Record<string, string> = {
+  'cabana-1': import.meta.env.PUBLIC_CAL_CABANA_1 ?? '',
+  'cabana-2': import.meta.env.PUBLIC_CAL_CABANA_2 ?? '',
+};
+const configurado = Boolean(clave && calendarios['cabana-1'] && calendarios['cabana-2']);
+// En la PC (npm run dev) sin configurar, muestra días ocupados de ejemplo para poder probar.
+const demo = !configurado && import.meta.env.DEV;
+
+const t = {
+  es: {
+    titulo: 'Disponibilidad',
+    ayuda: 'Toca tu día de llegada y después tu día de salida.',
+    libre: 'Disponible',
+    ocupado: 'Ocupado',
+    elegido: 'Tu estadía',
+    anterior: 'Mes anterior',
+    siguiente: 'Mes siguiente',
+    cargando: 'Cargando disponibilidad…',
+    error: 'No pudimos cargar el calendario. Escríbenos por WhatsApp y te confirmamos las fechas.',
+    sinCalendario: 'El calendario de disponibilidad estará disponible muy pronto. Mientras tanto, consúltanos las fechas por WhatsApp.',
+    consultar: 'Consultar fechas por WhatsApp',
+    choque: 'Esas fechas incluyen noches ocupadas. Elige otra salida.',
+    demo: 'Modo de prueba: días ocupados de ejemplo.',
+    dias: ['L', 'M', 'M', 'J', 'V', 'S', 'D'],
+  },
+  en: {
+    titulo: 'Availability',
+    ayuda: 'Tap your check-in day and then your check-out day.',
+    libre: 'Available',
+    ocupado: 'Booked',
+    elegido: 'Your stay',
+    anterior: 'Previous month',
+    siguiente: 'Next month',
+    cargando: 'Loading availability…',
+    error: 'We could not load the calendar. Message us on WhatsApp and we will confirm your dates.',
+    sinCalendario: 'The availability calendar is coming soon. Meanwhile, ask us about your dates on WhatsApp.',
+    consultar: 'Ask about dates on WhatsApp',
+    choque: 'Those dates include booked nights. Choose another check-out.',
+    demo: 'Test mode: sample booked days.',
+    dias: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+  },
+}[lang];
+
+const pestanas = cabanas.map((c) => ({ id: c.id, nombre: c.nombre[lang] }));
+const waConsulta = enlaceWhatsApp(
+  lang === 'es' ? 'Hola, quiero consultar disponibilidad en Cabañas Alto Captren.' : 'Hi, I would like to check availability at Alto Captren Cabins.',
+);
+---
+
+<section class="calendario" id="disponibilidad" aria-labelledby="cal-titulo">
+  <div class="cal-cabecera">
+    <h2 id="cal-titulo">{t.titulo}</h2>
+    <div class="cal-pestanas" role="tablist">
+      {
+        pestanas.map((p, i) => (
+          <button type="button" role="tab" class="cal-pestana" data-cabana={p.id} aria-selected={i === 0 ? 'true' : 'false'}>
+            {p.nombre}
+          </button>
+        ))
+      }
+    </div>
+  </div>
+
+  {
+    configurado || demo ? (
+      <>
+        <p class="cal-ayuda">{t.ayuda}</p>
+        {demo && <p class="cal-demo">{t.demo}</p>}
+        <div class="cal-nav">
+          <button type="button" class="cal-flecha" data-mover="-1" aria-label={t.anterior}>
+            <Icon name="chevron-left" size={20} />
+          </button>
+          <button type="button" class="cal-flecha" data-mover="1" aria-label={t.siguiente}>
+            <Icon name="chevron-right" size={20} />
+          </button>
+        </div>
+        <div class="cal-meses" data-meses aria-live="polite">
+          <p class="cal-estado">{t.cargando}</p>
+        </div>
+        <p class="cal-aviso" data-aviso role="alert" hidden />
+        <ul class="cal-leyenda">
+          <li><span class="punto libre" /> {t.libre}</li>
+          <li><span class="punto ocupado" /> {t.ocupado}</li>
+          <li><span class="punto elegido" /> {t.elegido}</li>
+        </ul>
+      </>
+    ) : (
+      <div class="cal-pronto">
+        <p>{t.sinCalendario}</p>
+        <a class="btn" href={waConsulta} target="_blank" rel="noopener">
+          {t.consultar}
+        </a>
+      </div>
+    )
+  }
+</section>
+
+{
+  (configurado || demo) && (
+    <script is:inline define:vars={{ clave, calendarios, demo, t, lang }}>
+      // Espera a que exista el formulario de reserva (está más abajo en la página)
+      document.addEventListener('DOMContentLoaded', function () {
+        var raiz = document.getElementById('disponibilidad');
+        if (!raiz) return;
+        var contenedor = raiz.querySelector('[data-meses]');
+        var aviso = raiz.querySelector('[data-aviso]');
+        var locale = lang === 'es' ? 'es-CL' : 'en-US';
+        var ZONA = 'America/Santiago';
+        var MESES_VISIBLES = window.matchMedia('(min-width: 760px)').matches ? 2 : 1;
+
+        // Fecha "YYYY-MM-DD" según la hora de Chile
+        var fmtChile = new Intl.DateTimeFormat('en-CA', { timeZone: ZONA, year: 'numeric', month: '2-digit', day: '2-digit' });
+        var fmtHora = new Intl.DateTimeFormat('en-GB', { timeZone: ZONA, hour: '2-digit', hourCycle: 'h23' });
+        function claveChile(d) {
+          return fmtChile.format(d);
+        }
+        function aISO(y, m, d) {
+          return y + '-' + String(m + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+        }
+        function sumarDias(iso, n) {
+          var p = iso.split('-').map(Number);
+          var d = new Date(Date.UTC(p[0], p[1] - 1, p[2] + n));
+          return d.toISOString().slice(0, 10);
+        }
+
+        var hoy = claveChile(new Date());
+        var ocupados = {}; // { 'cabana-1': Set de noches 'YYYY-MM-DD' }
+        Object.keys(calendarios).forEach(function (id) { ocupados[id] = new Set(); });
+        window.altoCaptrenOcupado = ocupados;
+
+        var cabana = Object.keys(calendarios)[0];
+        var hoyP = hoy.split('-').map(Number);
+        var mes = { y: hoyP[0], m: hoyP[1] - 1 };
+        var cargado = false;
+
+        // Una noche X está ocupada si el evento cubre las 23:00 de X (hora de Chile)
+        function marcar(id, inicio, fin) {
+          var s = new Date(inicio).getTime();
+          var e = new Date(fin).getTime();
+          for (var tms = s; tms < e; tms += 3600000) {
+            var d = new Date(tms);
+            if (fmtHora.format(d) === '23') ocupados[id].add(claveChile(d));
+          }
+        }
+
+        function datosDemo() {
+          ['cabana-1', 'cabana-2'].forEach(function (id, k) {
+            [5, 6, 7, 18, 19, 33, 34, 35, 36].forEach(function (n) {
+              ocupados[id].add(sumarDias(hoy, n + k * 3));
+            });
+          });
+        }
+
+        function cargar() {
+          if (demo) {
+            datosDemo();
+            return Promise.resolve();
+          }
+          var desde = new Date();
+          desde.setDate(desde.getDate() - 1);
+          var hasta = new Date();
+          hasta.setMonth(hasta.getMonth() + 13);
+          return Promise.all(
+            Object.keys(calendarios).map(function (id) {
+              var url =
+                'https://www.googleapis.com/calendar/v3/calendars/' +
+                encodeURIComponent(calendarios[id]) +
+                '/events?singleEvents=true&orderBy=startTime&maxResults=2500' +
+                '&timeMin=' + encodeURIComponent(desde.toISOString()) +
+                '&timeMax=' + encodeURIComponent(hasta.toISOString()) +
+                '&fields=' + encodeURIComponent('items(start,end,transparency)') +
+                '&key=' + encodeURIComponent(clave);
+              return fetch(url)
+                .then(function (r) {
+                  if (!r.ok) throw new Error('HTTP ' + r.status);
+                  return r.json();
+                })
+                .then(function (data) {
+                  (data.items || []).forEach(function (ev) {
+                    if (ev.transparency === 'transparent') return; // eventos marcados "Disponible"
+                    var ini = ev.start.dateTime || ev.start.date + 'T00:00:00-03:00';
+                    var fin = ev.end.dateTime || ev.end.date + 'T00:00:00-03:00';
+                    if (!ev.start.dateTime) {
+                      // Evento de día completo: ocupa las noches desde start.date hasta el día antes de end.date
+                      for (var iso = ev.start.date; iso < ev.end.date; iso = sumarDias(iso, 1)) ocupados[id].add(iso);
+                      return;
+                    }
+                    marcar(id, ini, fin);
+                  });
+                });
+            })
+          );
+        }
+
+        // --- Conexión con el formulario de reserva ---
+        var form = document.getElementById('form-reserva');
+        function campo(n) {
+          return form ? form.elements.namedItem(n) : null;
+        }
+        function setCampo(n, v) {
+          var c = campo(n);
+          if (!c) return;
+          c.value = v;
+          c.dispatchEvent(new Event('input', { bubbles: true }));
+          c.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+        function seleccion() {
+          return { lleg: (campo('llegada') || {}).value || '', sal: (campo('salida') || {}).value || '' };
+        }
+        function hayChoque(lleg, sal) {
+          for (var iso = lleg; iso < sal; iso = sumarDias(iso, 1)) if (ocupados[cabana].has(iso)) return true;
+          return false;
+        }
+
+        function mostrarAviso(msg) {
+          aviso.textContent = msg || '';
+          aviso.hidden = !msg;
+        }
+
+        function elegir(iso) {
+          mostrarAviso('');
+          var s = seleccion();
+          if (!s.lleg || s.sal || iso <= s.lleg) {
+            if (ocupados[cabana].has(iso)) return;
+            setCampo('llegada', iso);
+            setCampo('salida', '');
+          } else {
+            if (hayChoque(s.lleg, iso)) {
+              mostrarAviso(t.choque);
+              return;
+            }
+            setCampo('salida', iso);
+            var destino = document.querySelector('.resumen');
+            if (destino && window.matchMedia('(max-width: 859px)').matches) destino.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          pintar();
+        }
+
+        function pintar() {
+          if (!cargado) return;
+          var s = seleccion();
+          contenedor.innerHTML = '';
+          for (var k = 0; k < MESES_VISIBLES; k++) {
+            var y = mes.y, m = mes.m + k;
+            if (m > 11) { m -= 12; y++; }
+            var caja = document.createElement('div');
+            caja.className = 'cal-mes';
+            var titulo = new Date(y, m, 1).toLocaleDateString(locale, { month: 'long', year: 'numeric' });
+            var html = '<h3>' + titulo.charAt(0).toUpperCase() + titulo.slice(1) + '</h3><div class="cal-grilla">';
+            t.dias.forEach(function (d) { html += '<span class="cal-dia-nombre">' + d + '</span>'; });
+            var primero = (new Date(y, m, 1).getDay() + 6) % 7; // lunes = 0
+            for (var v = 0; v < primero; v++) html += '<span></span>';
+            var total = new Date(y, m + 1, 0).getDate();
+            for (var d = 1; d <= total; d++) {
+              var iso = aISO(y, m, d);
+              var clases = ['cal-dia'];
+              var pasado = iso < hoy;
+              var ocup = ocupados[cabana].has(iso);
+              if (pasado) clases.push('pasado');
+              if (ocup) clases.push('ocupado');
+              if (iso === hoy) clases.push('hoy');
+              if (s.lleg && iso === s.lleg) clases.push('inicio');
+              if (s.sal && iso === s.sal) clases.push('fin');
+              if (s.lleg && s.sal && iso > s.lleg && iso < s.sal) clases.push('rango');
+              // Un día ocupado igual puede ser día de SALIDA (se sale en la mañana)
+              var puedeSalir = s.lleg && !s.sal && iso > s.lleg && !hayChoque(s.lleg, iso);
+              var deshabilitado = pasado || (ocup && !puedeSalir);
+              html +=
+                '<button type="button" class="' + clases.join(' ') + '" data-dia="' + iso + '"' +
+                (deshabilitado ? ' disabled' : '') + ' aria-label="' +
+                new Date(y, m, d).toLocaleDateString(locale, { weekday: 'long', day: 'numeric', month: 'long' }) +
+                (ocup ? ' – ' + t.ocupado : '') + '">' + d + '</button>';
+            }
+            html += '</div>';
+            caja.innerHTML = html;
+            contenedor.appendChild(caja);
+          }
+          var prev = raiz.querySelector('[data-mover="-1"]');
+          prev.disabled = mes.y === hoyP[0] && mes.m === hoyP[1] - 1;
+        }
+
+        raiz.addEventListener('click', function (e) {
+          var dia = e.target.closest('[data-dia]');
+          if (dia && !dia.disabled) return elegir(dia.getAttribute('data-dia'));
+          var mover = e.target.closest('[data-mover]');
+          if (mover && !mover.disabled) {
+            mes.m += Number(mover.getAttribute('data-mover'));
+            if (mes.m < 0) { mes.m = 11; mes.y--; }
+            if (mes.m > 11) { mes.m = 0; mes.y++; }
+            return pintar();
+          }
+          var tab = e.target.closest('[data-cabana]');
+          if (tab) {
+            cabana = tab.getAttribute('data-cabana');
+            raiz.querySelectorAll('[data-cabana]').forEach(function (b) { b.setAttribute('aria-selected', String(b === tab)); });
+            if (campo('cabana') && campo('cabana').value !== cabana) setCampo('cabana', cabana);
+            mostrarAviso('');
+            pintar();
+          }
+        });
+
+        if (form) {
+          form.addEventListener('change', function (e) {
+            if (e.target.name === 'cabana' && e.target.value !== cabana) {
+              cabana = e.target.value;
+              raiz.querySelectorAll('[data-cabana]').forEach(function (b) {
+                b.setAttribute('aria-selected', String(b.getAttribute('data-cabana') === cabana));
+              });
+            }
+            pintar();
+          });
+          form.addEventListener('input', pintar);
+          var inicial = campo('cabana') && campo('cabana').value;
+          if (inicial && ocupados[inicial]) {
+            cabana = inicial;
+            raiz.querySelectorAll('[data-cabana]').forEach(function (b) {
+              b.setAttribute('aria-selected', String(b.getAttribute('data-cabana') === cabana));
+            });
+          }
+          var s0 = seleccion();
+          if (s0.lleg) {
+            var p0 = s0.lleg.split('-').map(Number);
+            mes = { y: p0[0], m: p0[1] - 1 };
+          }
+        }
+
+        cargar()
+          .then(function () {
+            cargado = true;
+            pintar();
+          })
+          .catch(function () {
+            contenedor.innerHTML = '<p class="cal-estado">' + t.error + '</p>';
+          });
+      });
+    </script>
+  )
+}
+
+<style>
+  .calendario {
+    padding: 1.6rem;
+    margin-bottom: 1.5rem;
+    background: var(--superficie);
+    border-radius: 24px;
+    box-shadow: var(--sombra);
+  }
+
+  .cal-cabecera {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8rem;
+  }
+
+  .cal-cabecera h2 {
+    margin: 0;
+    font-size: 1.6rem;
+  }
+
+  .cal-pestanas {
+    display: flex;
+    gap: 0.3rem;
+    padding: 0.25rem;
+    border-radius: 999px;
+    background: var(--chip);
+  }
+
+  .cal-pestana {
+    padding: 0.45rem 1rem;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--texto-suave);
+    font: inherit;
+    font-family: var(--fuente-ui);
+    font-weight: 700;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .cal-pestana[aria-selected='true'] {
+    background: var(--superficie);
+    color: var(--titulo);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.12);
+  }
+
+  .cal-ayuda,
+  .cal-demo {
+    margin: 0.8rem 0 0;
+    color: var(--texto-suave);
+    font-size: 0.95rem;
+  }
+
+  .cal-demo {
+    font-size: 0.85rem;
+    color: var(--acento);
+  }
+
+  .cal-nav {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.4rem;
+    margin-top: 0.6rem;
+  }
+
+  .cal-flecha {
+    display: grid;
+    place-items: center;
+    width: 38px;
+    height: 38px;
+    border: 1.5px solid var(--borde);
+    border-radius: 50%;
+    background: transparent;
+    color: var(--titulo);
+    cursor: pointer;
+  }
+
+  .cal-flecha:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .cal-meses {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.5rem 2rem;
+    margin-top: 0.4rem;
+  }
+
+  .cal-meses :global(h3) {
+    margin: 0 0 0.6rem;
+    font-size: 1.15rem;
+    text-align: center;
+  }
+
+  .cal-meses :global(.cal-grilla) {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0.25rem;
+  }
+
+  .cal-meses :global(.cal-dia-nombre) {
+    text-align: center;
+    font-family: var(--fuente-ui);
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--texto-suave);
+    padding-bottom: 0.3rem;
+  }
+
+  .cal-meses :global(.cal-dia) {
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 12px;
+    background: transparent;
+    color: var(--texto);
+    font: inherit;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background-color 0.15s ease, transform 0.15s ease;
+  }
+
+  .cal-meses :global(.cal-dia:not(:disabled):hover) {
+    background: var(--chip);
+    transform: scale(1.06);
+  }
+
+  .cal-meses :global(.cal-dia.hoy) {
+    box-shadow: inset 0 0 0 1.5px var(--acento);
+  }
+
+  .cal-meses :global(.cal-dia.pasado) {
+    color: var(--texto-suave);
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .cal-meses :global(.cal-dia.ocupado) {
+    background: repeating-linear-gradient(-45deg, transparent 0 5px, rgb(176 70 50 / 0.16) 5px 7px);
+    color: #b04632;
+    text-decoration: line-through;
+  }
+
+  .cal-meses :global(.cal-dia.ocupado:disabled) {
+    cursor: not-allowed;
+  }
+
+  .cal-meses :global(.cal-dia.rango) {
+    background: rgb(47 86 67 / 0.18);
+    border-radius: 6px;
+  }
+
+  .cal-meses :global(.cal-dia.inicio),
+  .cal-meses :global(.cal-dia.fin) {
+    background: var(--bosque-claro);
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .cal-estado {
+    padding: 2rem 0;
+    text-align: center;
+    color: var(--texto-suave);
+  }
+
+  .cal-aviso {
+    margin: 1rem 0 0;
+    padding: 0.6rem 0.8rem;
+    border-radius: 10px;
+    background: #fde8e4;
+    color: #8a2a1a;
+    font-weight: 600;
+  }
+
+  .cal-leyenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.2rem;
+    list-style: none;
+    margin: 1.2rem 0 0;
+    padding: 0;
+    font-size: 0.88rem;
+    color: var(--texto-suave);
+  }
+
+  .cal-leyenda li {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .punto {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+  }
+
+  .punto.libre {
+    border: 1.5px solid var(--borde);
+  }
+
+  .punto.ocupado {
+    background: repeating-linear-gradient(-45deg, transparent 0 3px, rgb(176 70 50 / 0.5) 3px 5px);
+  }
+
+  .punto.elegido {
+    background: var(--bosque-claro);
+  }
+
+  .cal-pronto {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 0.8rem;
+  }
+
+  .cal-pronto p {
+    margin: 0;
+    max-width: 36rem;
+    color: var(--texto-suave);
+  }
+
+  :global(:root[data-tema='noche']) .cal-meses :global(.cal-dia.ocupado) {
+    color: #ff9a85;
+  }
+
+  :global(:root[data-tema='noche']) .cal-meses :global(.cal-dia.rango) {
+    background: rgb(159 211 173 / 0.18);
+  }
+
+  :global(:root[data-tema='noche']) .cal-aviso {
+    background: #3b1a14;
+    color: #ffb4a3;
+  }
+</style>
