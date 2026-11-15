@@ -59,7 +59,7 @@ const textos = {
       'Escríbenos por WhatsApp y te confirmamos disponibilidad y precio.',
       'Reserva con un abono del 50% por transferencia.',
     ],
-    reservaPronto: 'El formulario de reserva y el calendario de disponibilidad estarán disponibles muy pronto.',
+    reservaPronto: 'Ir al formulario de reserva',
   },
   en: {
     kicker: 'Captren · Curacautín · Araucanía, Chile',
@@ -104,7 +104,7 @@ const textos = {
       'Message us on WhatsApp and we will confirm availability and price.',
       'Secure your booking with a 50% deposit by bank transfer.',
     ],
-    reservaPronto: 'The booking form and availability calendar are coming soon.',
+    reservaPronto: 'Go to the booking form',
   },
 }[lang];
 ---
@@ -129,7 +129,7 @@ const textos = {
       {textos.desde} <strong>{clp(precioDesde)}</strong> / {textos.noche}
     </p>
     <div class="acciones">
-      <a class="btn" href="#reservar">{textos.reservar}</a>
+      <a class="btn" href={url(`${lang}/reservar/`)}>{textos.reservar}</a>
       <a class="btn btn-outline" href="#cabanas">{textos.verCabanas}</a>
     </div>
   </div>
@@ -224,7 +224,7 @@ const textos = {
   <ol class="pasos">
     {textos.pasos.map((paso) => <li>{paso}</li>)}
   </ol>
-  <p class="aviso">{textos.reservaPronto}</p>
+  <p><a class="btn" href={url(`${lang}/reservar/`)}>{textos.reservaPronto} →</a></p>
 </section>
 
 <style>

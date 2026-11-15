@@ -52,7 +52,7 @@ const textos = {
   },
 }[lang];
 
-const reservar = url(`${lang}/#reservar`);
+const reservar = (id: string) => url(`${lang}/reservar/?cabana=${id}`);
 ---
 
 <section class="container encabezado">
@@ -111,7 +111,7 @@ const reservar = url(`${lang}/#reservar`);
           </tbody>
         </table>
 
-        <a class="btn" href={reservar}>
+        <a class="btn" href={reservar(c.id)}>
           {textos.reservar} {c.nombre[lang]}
         </a>
       </div>
