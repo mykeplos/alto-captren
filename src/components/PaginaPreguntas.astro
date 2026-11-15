@@ -1,4 +1,6 @@
 ---
+import Banner from './Banner.astro';
+import fotoBanner from '../assets/volcan-cerca.jpg';
 import type { Lang } from '../i18n/ui';
 import Icon from './Icon.astro';
 
@@ -47,8 +49,15 @@ const textos = {
 }[lang];
 ---
 
+<Banner
+  titulo={textos.titulo}
+  eyebrow={lang === 'es' ? 'Ayuda' : 'Help'}
+  imagen={fotoBanner}
+  alt={lang === 'es' ? 'Volcán Llaima con nieve en la cumbre' : 'Llaima volcano with snow on the summit'}
+  posicion="50% 40%"
+/>
+
 <section class="container pagina">
-  <h1>{textos.titulo}</h1>
   <div class="preguntas" data-revelar-grupo>
     {
       textos.preguntas.map(([pregunta, respuesta]) => (
