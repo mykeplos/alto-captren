@@ -111,9 +111,70 @@ svg {
   font-size: 0.95rem;
 }
 
-.nav-list a:hover {
+.nav-list a:hover,
+.nav-list a[aria-current='page'] {
   color: #fff;
   text-decoration: underline;
+  text-underline-offset: 4px;
+}
+
+.nav {
+  order: 2;
+}
+
+.lang-switch {
+  order: 3;
+}
+
+.menu-toggle {
+  display: none;
+  order: 4;
+  background: none;
+  border: 0;
+  color: var(--nieve);
+  font-size: 1.6rem;
+  line-height: 1;
+  padding: 0.3rem 0.4rem;
+  cursor: pointer;
+}
+
+/* Celular: menú desplegable */
+@media (max-width: 720px) {
+  .header-inner {
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .brand {
+    font-size: 1rem;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+
+  .nav {
+    display: none;
+    order: 5;
+    width: 100%;
+    padding-bottom: 0.8rem;
+  }
+
+  .nav.abierto {
+    display: block;
+  }
+
+  .nav-list {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .nav-list a {
+    display: block;
+    padding: 0.65rem 0.2rem;
+    font-size: 1.05rem;
+    border-top: 1px solid rgb(255 255 255 / 0.12);
+  }
 }
 
 .lang-switch {
@@ -126,7 +187,7 @@ svg {
   font-size: 0.85rem;
 }
 
-@media (max-width: 560px) {
+@media (max-width: 340px) {
   .brand span {
     display: none;
   }

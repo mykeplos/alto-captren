@@ -18,6 +18,13 @@ const pageTitle = title ? `${title} · ${t('site.name')}` : `${t('site.name')} �
 const pageDescription = description ?? t('site.description');
 const home = url(`${lang}/`);
 const year = new Date().getFullYear();
+
+const navItems: { label: string; href: string }[] = [
+  { label: t('nav.home'), href: home },
+  { label: t('nav.cabins'), href: url(`${lang}/cabanas/`) },
+  { label: t('nav.contact'), href: '#contacto' },
+];
+const current = Astro.url.pathname;
 ---
 
 <!doctype html>
@@ -39,19 +46,48 @@ const year = new Date().getFullYear();
           <img src={url('favicon.svg')} alt="" width="32" height="32" />
           <span>{t('site.name')}</span>
         </a>
-        <nav aria-label={t('nav.menu')}>
-          <ul class="nav-list">
-            <li><a href={home}>{t('nav.home')}</a></li>
-            <li><a href={`${home}#cabanas`}>{t('nav.cabins')}</a></li>
-            <li><a href="#contacto">{t('nav.contact')}</a></li>
-          </ul>
-        </nav>
         <a class="lang-switch" href={url(`${other}/${path}`)} hreflang={other} lang={other}>
           {other.toUpperCase()}
           <span class="sr-only">{t('lang.switch')}</span>
         </a>
+        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="menu-principal">
+          <span aria-hidden="true">☰</span>
+          <span class="sr-only">{t('nav.menu')}</span>
+        </button>
+        <nav id="menu-principal" class="nav" aria-label={t('nav.menu')}>
+          <ul class="nav-list">
+            {
+              navItems.map((item) => (
+                <li>
+                  <a href={item.href} aria-current={item.href === current ? 'page' : undefined}>
+                    {item.label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </nav>
       </div>
     </header>
+    <script is:inline>
+      (function () {
+        var boton = document.querySelector('.menu-toggle');
+        var menu = document.getElementById('menu-principal');
+        if (!boton || !menu) return;
+        function cerrar() {
+          boton.setAttribute('aria-expanded', 'false');
+          menu.classList.remove('abierto');
+        }
+        boton.addEventListener('click', function () {
+          var abierto = boton.getAttribute('aria-expanded') === 'true';
+          boton.setAttribute('aria-expanded', String(!abierto));
+          menu.classList.toggle('abierto', !abierto);
+        });
+        menu.addEventListener('click', function (e) {
+          if (e.target.closest('a')) cerrar();
+        });
+      })();
+    </script>
 
     <main>
       <slot />
