@@ -1,0 +1,177 @@
+---
+// Barra fija abajo en el celular: precio desde, WhatsApp y botón Reservar.
+// Aparece al bajar un poco; en computador no se muestra.
+import { clp, precioDesde } from '../data/cabanas';
+import { enlaceWhatsApp } from '../config';
+import { useTranslations, type Lang } from '../i18n/ui';
+import { url } from '../lib/url';
+import Icon from './Icon.astro';
+import IconoMarca from './IconoMarca.astro';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const tr = useTranslations(lang);
+const t =
+  lang === 'es'
+    ? { desde: 'Desde', detalle: 'por noche', wa: 'Escríbenos por WhatsApp' }
+    : { desde: 'From', detalle: 'per night', wa: 'Message us on WhatsApp' };
+---
+
+<div class="barra-reserva" data-barra-reserva aria-hidden="true">
+  <div class="barra-precio">
+    <span class="barra-desde">
+      {t.desde} <strong>{clp(precioDesde)}</strong>
+    </span>
+    <span class="barra-detalle">{t.detalle}</span>
+  </div>
+  <a
+    class="barra-wa"
+    href={enlaceWhatsApp(tr('wa.hola'))}
+    target="_blank"
+    rel="noopener"
+    aria-label={t.wa}
+    tabindex="-1"
+  >
+    <IconoMarca name="whatsapp" size={22} />
+  </a>
+  <a class="btn barra-btn" href={url(`${lang}/reservar/`)} tabindex="-1">
+    <Icon name="calendar-check" size={18} />
+    {tr('nav.book')}
+  </a>
+</div>
+
+<script is:inline>
+  (function () {
+    var barra = document.querySelector('[data-barra-reserva]');
+    if (!barra) return;
+    document.body.classList.add('con-barra-reserva');
+    var enlaces = barra.querySelectorAll('a');
+    var visible = false;
+    function revisar() {
+      var mostrar = window.scrollY > 320;
+      if (mostrar === visible) return;
+      visible = mostrar;
+      barra.classList.toggle('visible', mostrar);
+      barra.setAttribute('aria-hidden', String(!mostrar));
+      enlaces.forEach(function (a) {
+        a.tabIndex = mostrar ? 0 : -1;
+      });
+    }
+    revisar();
+    window.addEventListener('scroll', revisar, { passive: true });
+  })();
+</script>
+
+<style>
+  .barra-reserva {
+    display: none;
+  }
+
+  @media (max-width: 760px) {
+    .barra-reserva {
+      position: fixed;
+      left: 10px;
+      right: 10px;
+      bottom: calc(10px + env(safe-area-inset-bottom));
+      z-index: 25;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.55rem 0.55rem 0.55rem 1rem;
+      border-radius: 18px;
+      background: var(--vidrio);
+      backdrop-filter: saturate(1.4) blur(16px);
+      -webkit-backdrop-filter: saturate(1.4) blur(16px);
+      border: 1px solid var(--borde);
+      box-shadow: 0 12px 34px rgb(0 0 0 / 0.22);
+      transform: translateY(140%);
+      opacity: 0;
+      transition:
+        transform 0.35s cubic-bezier(0.2, 0.8, 0.2, 1),
+        opacity 0.25s ease;
+    }
+
+    .barra-reserva.visible {
+      transform: none;
+      opacity: 1;
+    }
+
+    .barra-precio {
+      display: grid;
+      flex: 1;
+      min-width: 0;
+      line-height: 1.25;
+    }
+
+    .barra-desde {
+      font-family: var(--fuente-ui);
+      font-size: 0.8rem;
+      color: var(--texto-suave);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .barra-desde strong {
+      font-size: 1.05rem;
+      color: var(--titulo);
+    }
+
+    .barra-detalle {
+      font-size: 0.74rem;
+      color: var(--texto-suave);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .barra-wa {
+      display: grid;
+      place-items: center;
+      flex: none;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #25d366;
+      color: #fff;
+    }
+
+    .barra-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex: none;
+      padding: 0.7rem 1rem;
+      border-radius: 14px;
+      font-size: 0.95rem;
+    }
+
+    /* La barra ya trae WhatsApp: se esconde el botón flotante y se deja espacio al final */
+    :global(body.con-barra-reserva .wa-flotante) {
+      display: none;
+    }
+
+    :global(body.con-barra-reserva) {
+      padding-bottom: calc(80px + env(safe-area-inset-bottom));
+    }
+  }
+
+  @media (max-width: 360px) {
+    .barra-detalle {
+      display: none;
+    }
+
+    .barra-btn {
+      padding: 0.7rem 0.85rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .barra-reserva {
+      transition: none;
+    }
+  }
+</style>
