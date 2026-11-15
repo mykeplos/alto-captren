@@ -1,0 +1,28 @@
+---
+// Íconos de línea (Lucide). Uso: <Icon name="flame" /> — nombres en https://lucide.dev/icons
+import * as iconos from 'lucide-static';
+
+interface Props {
+  name: string;
+  size?: number;
+  class?: string;
+  /** Texto para lectores de pantalla. Si falta, el ícono es decorativo. */
+  label?: string;
+}
+
+const { name, size = 22, class: clase = '', label } = Astro.props;
+const pascal = name
+  .split('-')
+  .map((p) => p.charAt(0).toUpperCase() + p.slice(1))
+  .join('');
+const svg = (iconos as unknown as Record<string, string>)[pascal];
+if (!svg) throw new Error(`Ícono "${name}" no existe en lucide-static`);
+
+const accesible = label ? `role="img" aria-label="${label}"` : 'aria-hidden="true"';
+const html = svg
+  .replace(/width="24"/, `width="${size}"`)
+  .replace(/height="24"/, `height="${size}"`)
+  .replace(/class="([^"]*)"/, `class="$1 icono ${clase}" ${accesible} focusable="false"`);
+---
+
+<Fragment set:html={html} />

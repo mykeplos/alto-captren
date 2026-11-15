@@ -1,0 +1,45 @@
+---
+import Icon from './Icon.astro';
+import type { Cabana } from '../data/cabanas';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  cabana: Cabana;
+  lang: Lang;
+}
+
+const { cabana: c, lang } = Astro.props;
+const t = {
+  es: { personas: 'personas', dormitorios: 'dormitorios', bano: 'baño' },
+  en: { personas: 'guests', dormitorios: 'bedrooms', bano: 'bathroom' },
+}[lang];
+---
+
+<ul class="datos">
+  <li><Icon name="users" size={18} /> {c.capacidad} {t.personas}</li>
+  <li><Icon name="bed-double" size={18} /> {c.dormitorios} {t.dormitorios}</li>
+  <li><Icon name="shower-head" size={18} /> {c.banos} {t.bano}</li>
+</ul>
+
+<style>
+  .datos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 1rem;
+    list-style: none;
+    padding: 0;
+    margin: 0 0 0.8rem;
+    color: var(--texto-suave);
+    font-size: 0.95rem;
+  }
+
+  .datos li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .datos :global(.icono) {
+    color: var(--madera);
+  }
+</style>
