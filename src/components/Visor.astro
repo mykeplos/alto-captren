@@ -1,0 +1,386 @@
+---
+// Visor de fotos a pantalla completa. Abre cualquier enlace con `data-galeria`
+// (ver FotoAmpliable.astro). Flechas, teclado, deslizar con el dedo y miniaturas.
+import Icon from './Icon.astro';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t =
+  lang === 'es'
+    ? { titulo: 'Galería de fotos', cerrar: 'Cerrar', anterior: 'Foto anterior', siguiente: 'Foto siguiente', de: 'de' }
+    : { titulo: 'Photo gallery', cerrar: 'Close', anterior: 'Previous photo', siguiente: 'Next photo', de: 'of' };
+---
+
+<dialog class="visor" aria-label={t.titulo} data-de={t.de}>
+  <div class="visor-barra">
+    <span class="visor-contador" aria-live="polite"></span>
+    <button class="visor-btn visor-cerrar" type="button" aria-label={t.cerrar} title={t.cerrar}>
+      <Icon name="x" size={24} />
+    </button>
+  </div>
+  <div class="visor-escena">
+    <button class="visor-btn visor-flecha visor-anterior" type="button" aria-label={t.anterior} title={t.anterior}>
+      <Icon name="chevron-left" size={28} />
+    </button>
+    <figure class="visor-figura">
+      <img class="visor-img" alt="" />
+      <figcaption class="visor-titulo"></figcaption>
+    </figure>
+    <button class="visor-btn visor-flecha visor-siguiente" type="button" aria-label={t.siguiente} title={t.siguiente}>
+      <Icon name="chevron-right" size={28} />
+    </button>
+  </div>
+  <div class="visor-miniaturas"></div>
+</dialog>
+
+<script is:inline>
+  (function () {
+    var visor = document.querySelector('.visor');
+    if (!visor || !visor.showModal) return;
+    var img = visor.querySelector('.visor-img');
+    var titulo = visor.querySelector('.visor-titulo');
+    var contador = visor.querySelector('.visor-contador');
+    var miniaturas = visor.querySelector('.visor-miniaturas');
+    var de = visor.getAttribute('data-de');
+    var fotos = [];
+    var actual = 0;
+    var origen = null;
+
+    function mostrar(i, direccion) {
+      actual = (i + fotos.length) % fotos.length;
+      var f = fotos[actual];
+      var foto = f.querySelector('img');
+      img.classList.remove('entra-izq', 'entra-der');
+      void img.offsetWidth;
+      if (direccion) img.classList.add(direccion > 0 ? 'entra-der' : 'entra-izq');
+      img.src = f.getAttribute('href');
+      img.alt = foto ? foto.alt : '';
+      if (f.dataset.ancho) {
+        img.width = Number(f.dataset.ancho);
+        img.height = Number(f.dataset.alto);
+      }
+      titulo.textContent = f.dataset.titulo || '';
+      contador.textContent = actual + 1 + ' ' + de + ' ' + fotos.length;
+      visor.classList.toggle('una-sola', fotos.length < 2);
+      Array.prototype.forEach.call(miniaturas.children, function (m, j) {
+        var activa = j === actual;
+        m.classList.toggle('activa', activa);
+        m.setAttribute('aria-current', activa ? 'true' : 'false');
+        if (activa) m.scrollIntoView({ block: 'nearest', inline: 'center' });
+      });
+      // Precarga las vecinas para que el cambio sea instantáneo
+      [actual + 1, actual - 1].forEach(function (k) {
+        var v = fotos[(k + fotos.length) % fotos.length];
+        if (v) new Image().src = v.getAttribute('href');
+      });
+    }
+
+    function abrir(enlace) {
+      var grupo = enlace.getAttribute('data-galeria');
+      fotos = Array.prototype.slice.call(document.querySelectorAll('a[data-galeria="' + grupo + '"]'));
+      miniaturas.innerHTML = '';
+      fotos.forEach(function (f, j) {
+        var foto = f.querySelector('img');
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'visor-mini';
+        b.setAttribute('aria-label', (f.dataset.titulo || foto.alt) + ' (' + (j + 1) + ')');
+        var m = document.createElement('img');
+        m.src = foto.currentSrc || foto.src;
+        m.alt = '';
+        b.appendChild(m);
+        b.addEventListener('click', function () {
+          mostrar(j, j > actual ? 1 : -1);
+        });
+        miniaturas.appendChild(b);
+      });
+      origen = enlace;
+      document.documentElement.classList.add('visor-abierto');
+      visor.showModal();
+      mostrar(fotos.indexOf(enlace), 0);
+    }
+
+    function cerrar() {
+      visor.close();
+    }
+
+    visor.addEventListener('close', function () {
+      document.documentElement.classList.remove('visor-abierto');
+      if (origen) origen.focus({ preventScroll: true });
+    });
+
+    document.addEventListener('click', function (e) {
+      var enlace = e.target.closest && e.target.closest('a[data-galeria]');
+      if (!enlace || e.ctrlKey || e.metaKey || e.shiftKey) return;
+      e.preventDefault();
+      abrir(enlace);
+    });
+
+    visor.querySelector('.visor-cerrar').addEventListener('click', cerrar);
+    visor.querySelector('.visor-anterior').addEventListener('click', function () {
+      mostrar(actual - 1, -1);
+    });
+    visor.querySelector('.visor-siguiente').addEventListener('click', function () {
+      mostrar(actual + 1, 1);
+    });
+
+    // Tocar fuera de la foto cierra
+    visor.addEventListener('click', function (e) {
+      if (e.target === visor || e.target.classList.contains('visor-escena')) cerrar();
+    });
+
+    visor.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight') mostrar(actual + 1, 1);
+      else if (e.key === 'ArrowLeft') mostrar(actual - 1, -1);
+    });
+
+    // Deslizar con el dedo
+    var inicioX = null;
+    var inicioY = null;
+    visor.addEventListener(
+      'touchstart',
+      function (e) {
+        inicioX = e.touches[0].clientX;
+        inicioY = e.touches[0].clientY;
+      },
+      { passive: true }
+    );
+    visor.addEventListener(
+      'touchend',
+      function (e) {
+        if (inicioX === null) return;
+        var dx = e.changedTouches[0].clientX - inicioX;
+        var dy = e.changedTouches[0].clientY - inicioY;
+        inicioX = null;
+        if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)) mostrar(actual + (dx < 0 ? 1 : -1), dx < 0 ? 1 : -1);
+        else if (dy > 90 && Math.abs(dy) > Math.abs(dx)) cerrar();
+      },
+      { passive: true }
+    );
+  })();
+</script>
+
+<style is:global>
+  html.visor-abierto {
+    overflow: hidden;
+  }
+
+  .visor {
+    width: 100vw;
+    height: 100dvh;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: rgb(8 12 10 / 0.94);
+    color: #f7f5f0;
+  }
+
+  .visor[open] {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    animation: visor-aparece 0.25s ease;
+  }
+
+  .visor::backdrop {
+    background: rgb(0 0 0 / 0.6);
+    backdrop-filter: blur(6px);
+  }
+
+  @keyframes visor-aparece {
+    from {
+      opacity: 0;
+    }
+  }
+
+  .visor-barra {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.8rem 1rem;
+  }
+
+  .visor-contador {
+    font-family: var(--fuente-ui);
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    opacity: 0.8;
+  }
+
+  .visor-btn {
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    border: 1px solid rgb(255 255 255 / 0.18);
+    border-radius: 50%;
+    background: rgb(255 255 255 / 0.08);
+    color: #fff;
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      transform 0.2s ease;
+  }
+
+  .visor-btn:hover {
+    background: rgb(255 255 255 / 0.2);
+  }
+
+  .visor-btn:focus-visible {
+    outline: 3px solid #e7b37e;
+    outline-offset: 2px;
+  }
+
+  .visor-escena {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 0 1rem;
+    min-height: 0;
+  }
+
+  .visor-figura {
+    margin: 0;
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+  }
+
+  .visor-img {
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    /* Alto disponible: pantalla menos barra, título y miniaturas */
+    max-height: calc(100dvh - 220px);
+    min-height: 0;
+    object-fit: contain;
+    border-radius: 10px;
+    box-shadow: 0 20px 60px rgb(0 0 0 / 0.5);
+    user-select: none;
+  }
+
+  .visor-img.entra-der {
+    animation: visor-der 0.35s ease;
+  }
+
+  .visor-img.entra-izq {
+    animation: visor-izq 0.35s ease;
+  }
+
+  @keyframes visor-der {
+    from {
+      opacity: 0;
+      transform: translateX(40px);
+    }
+  }
+
+  @keyframes visor-izq {
+    from {
+      opacity: 0;
+      transform: translateX(-40px);
+    }
+  }
+
+  .visor-titulo {
+    font-family: var(--fuente-titulos);
+    font-size: 1.15rem;
+    text-align: center;
+    min-height: 1.4em;
+  }
+
+  .visor-miniaturas {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: safe center;
+    overflow-x: auto;
+    padding: 0.9rem 1rem 1.1rem;
+    scrollbar-width: none;
+  }
+
+  .visor-mini {
+    flex: none;
+    width: 72px;
+    height: 50px;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    overflow: hidden;
+    background: none;
+    cursor: pointer;
+    opacity: 0.5;
+    transition:
+      opacity 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  .visor-mini img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .visor-mini:hover {
+    opacity: 0.85;
+  }
+
+  .visor-mini.activa {
+    opacity: 1;
+    border-color: #e7b37e;
+  }
+
+  .visor.una-sola .visor-flecha,
+  .visor.una-sola .visor-miniaturas {
+    visibility: hidden;
+  }
+
+  /* Celular: flechas sobre la foto, miniaturas más chicas */
+  @media (max-width: 700px) {
+    .visor-escena {
+      grid-template-columns: minmax(0, 1fr);
+      padding: 0 0.5rem;
+    }
+
+    .visor-flecha {
+      position: absolute;
+      top: 45%;
+      z-index: 1;
+      width: 40px;
+      height: 40px;
+      background: rgb(0 0 0 / 0.4);
+    }
+
+    .visor-anterior {
+      left: 0.6rem;
+    }
+
+    .visor-siguiente {
+      right: 0.6rem;
+    }
+
+    .visor-mini {
+      width: 56px;
+      height: 40px;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .visor[open],
+    .visor-img.entra-der,
+    .visor-img.entra-izq {
+      animation: none;
+    }
+  }
+</style>
