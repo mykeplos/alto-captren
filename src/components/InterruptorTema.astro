@@ -1,5 +1,6 @@
 ---
 // Interruptor día / noche (tema claro y oscuro). Recuerda la elección en el navegador.
+// Diseño segmentado: sol y luna en una píldora de vidrio, con un fondo que se desliza al activo.
 import Icon from './Icon.astro';
 import type { Lang } from '../i18n/ui';
 
@@ -12,36 +13,62 @@ const etiqueta = lang === 'es' ? 'Modo noche' : 'Night mode';
 ---
 
 <button class="interruptor" type="button" role="switch" aria-checked="false" aria-label={etiqueta} title={etiqueta}>
-  <span class="cielo" aria-hidden="true">
-    <span class="estrella e1"></span>
-    <span class="estrella e2"></span>
-    <span class="estrella e3"></span>
-    <span class="nube"></span>
-  </span>
-  <span class="perilla" aria-hidden="true">
-    <span class="sol"><Icon name="sun" size={16} /></span>
-    <span class="luna"><Icon name="moon" size={15} /></span>
-  </span>
+  <span class="indicador" aria-hidden="true"></span>
+  <span class="opcion sol" aria-hidden="true"><Icon name="sun" size={16} /></span>
+  <span class="opcion luna" aria-hidden="true"><Icon name="moon" size={15} /></span>
 </button>
 
 <script is:inline>
   (function () {
     var raiz = document.documentElement;
-    document.querySelectorAll('.interruptor').forEach(function (b) {
-      function pintar() {
-        b.setAttribute('aria-checked', String(raiz.getAttribute('data-tema') === 'noche'));
-      }
+    var botones = document.querySelectorAll('.interruptor');
+    var sinMovimiento = matchMedia('(prefers-reduced-motion: reduce)');
+
+    function pintar() {
+      var noche = raiz.getAttribute('data-tema') === 'noche';
+      botones.forEach(function (o) {
+        o.setAttribute('aria-checked', String(noche));
+      });
+    }
+
+    function aplicar(noche) {
+      raiz.setAttribute('data-tema', noche ? 'noche' : 'dia');
+      try {
+        localStorage.setItem('tema', noche ? 'noche' : 'dia');
+      } catch (e) {}
       pintar();
+    }
+
+    pintar();
+    botones.forEach(function (b) {
       b.addEventListener('click', function () {
         var noche = raiz.getAttribute('data-tema') !== 'noche';
+
+        // Navegadores modernos: el nuevo tema se abre en círculo desde el botón
+        if (document.startViewTransition && !sinMovimiento.matches) {
+          var r = b.getBoundingClientRect();
+          var x = r.left + r.width / 2;
+          var y = r.top + r.height / 2;
+          var radio = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+          raiz.classList.add('revelando-tema');
+          var t = document.startViewTransition(function () {
+            aplicar(noche);
+          });
+          t.ready.then(function () {
+            raiz.animate(
+              { clipPath: ['circle(0px at ' + x + 'px ' + y + 'px)', 'circle(' + radio + 'px at ' + x + 'px ' + y + 'px)'] },
+              { duration: 650, easing: 'cubic-bezier(0.4, 0, 0.2, 1)', pseudoElement: '::view-transition-new(root)' }
+            );
+          });
+          t.finished.finally(function () {
+            raiz.classList.remove('revelando-tema');
+          });
+          return;
+        }
+
+        // Los demás: cambio suave de colores
         raiz.classList.add('cambiando-tema');
-        raiz.setAttribute('data-tema', noche ? 'noche' : 'dia');
-        try {
-          localStorage.setItem('tema', noche ? 'noche' : 'dia');
-        } catch (e) {}
-        document.querySelectorAll('.interruptor').forEach(function (o) {
-          o.setAttribute('aria-checked', String(noche));
-        });
+        aplicar(noche);
         setTimeout(function () {
           raiz.classList.remove('cambiando-tema');
         }, 500);
@@ -50,18 +77,40 @@ const etiqueta = lang === 'es' ? 'Modo noche' : 'Night mode';
   })();
 </script>
 
+<style is:global>
+  /* Solo durante el cambio de tema: sin el fundido por defecto, para que se vea el círculo */
+  html.revelando-tema::view-transition-old(root),
+  html.revelando-tema::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+</style>
+
 <style>
   .interruptor {
     position: relative;
     flex: none;
-    width: 62px;
-    height: 32px;
-    padding: 0;
-    border: 1px solid rgb(255 255 255 / 0.35);
+    display: inline-grid;
+    grid-template-columns: 1fr 1fr;
+    align-items: center;
+    width: 66px;
+    height: 34px;
+    padding: 3px;
+    border: 1px solid rgb(255 255 255 / 0.28);
     border-radius: 999px;
+    background: rgb(255 255 255 / 0.1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: rgb(247 245 240 / 0.7);
     cursor: pointer;
-    overflow: hidden;
-    background: none;
+    transition:
+      background-color 0.2s ease,
+      border-color 0.2s ease;
+  }
+
+  .interruptor:hover {
+    background: rgb(255 255 255 / 0.18);
+    border-color: rgb(255 255 255 / 0.45);
   }
 
   .interruptor:focus-visible {
@@ -69,119 +118,63 @@ const etiqueta = lang === 'es' ? 'Modo noche' : 'Night mode';
     outline-offset: 2px;
   }
 
-  /* Cielo: celeste de día, azul noche con estrellas */
-  .cielo {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, #8fd0f2, #4aa6dc);
-    transition: background 0.5s ease;
-  }
-
-  [aria-checked='true'] .cielo {
-    background: linear-gradient(135deg, #1b2450, #0b1030);
-  }
-
-  .estrella {
-    position: absolute;
-    width: 3px;
-    height: 3px;
-    border-radius: 50%;
-    background: #fff;
-    opacity: 0;
-    transform: scale(0.3);
-    transition:
-      opacity 0.4s ease 0.15s,
-      transform 0.4s ease 0.15s;
-  }
-
-  .e1 {
-    top: 7px;
-    left: 10px;
-  }
-
-  .e2 {
-    top: 18px;
-    left: 18px;
-    width: 2px;
-    height: 2px;
-  }
-
-  .e3 {
-    top: 10px;
-    left: 26px;
-    width: 2px;
-    height: 2px;
-  }
-
-  [aria-checked='true'] .estrella {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  .nube {
-    position: absolute;
-    right: 7px;
-    bottom: 6px;
-    width: 16px;
-    height: 7px;
-    border-radius: 6px;
-    background: rgb(255 255 255 / 0.85);
-    transition:
-      opacity 0.3s ease,
-      transform 0.4s ease;
-  }
-
-  [aria-checked='true'] .nube {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-
-  /* Perilla: sol a la izquierda, luna a la derecha */
-  .perilla {
+  /* Fondo que se desliza bajo la opción activa */
+  .indicador {
     position: absolute;
     top: 3px;
     left: 3px;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
+    width: 28px;
+    height: 26px;
+    border-radius: 999px;
+    background: #f7f5f0;
+    box-shadow:
+      0 2px 6px rgb(0 0 0 / 0.25),
+      inset 0 -1px 0 rgb(0 0 0 / 0.06);
+    transition:
+      transform 0.35s cubic-bezier(0.4, 0, 0.2, 1),
+      background-color 0.35s ease;
+  }
+
+  [aria-checked='true'] .indicador {
+    transform: translateX(30px);
+    background: #1c2a24;
+    box-shadow:
+      0 2px 6px rgb(0 0 0 / 0.4),
+      inset 0 0 0 1px rgb(255 255 255 / 0.14);
+  }
+
+  .opcion {
+    position: relative;
     display: grid;
     place-items: center;
-    background: #ffd56b;
-    color: #b0620a;
-    box-shadow: 0 2px 6px rgb(0 0 0 / 0.3);
+    height: 26px;
     transition:
-      transform 0.45s cubic-bezier(0.5, 1.6, 0.4, 0.8),
-      background 0.45s ease,
-      color 0.45s ease;
+      color 0.3s ease,
+      transform 0.35s ease;
   }
 
-  [aria-checked='true'] .perilla {
-    transform: translateX(30px) rotate(-30deg);
-    background: #e9edf7;
-    color: #3a4470;
+  /* Día: sol dorado sobre el fondo claro */
+  [aria-checked='false'] .sol {
+    color: #b8701c;
   }
 
-  .sol,
-  .luna {
-    grid-area: 1 / 1;
-    display: grid;
-    transition:
-      opacity 0.3s ease,
-      transform 0.45s ease;
-  }
-
-  .luna {
-    opacity: 0;
-    transform: scale(0.4);
+  /* Noche: luna dorada sobre el fondo oscuro */
+  [aria-checked='true'] .luna {
+    color: #e7b37e;
   }
 
   [aria-checked='true'] .sol {
-    opacity: 0;
-    transform: scale(0.4) rotate(90deg);
+    transform: rotate(-90deg);
   }
 
-  [aria-checked='true'] .luna {
-    opacity: 1;
-    transform: none;
+  [aria-checked='false'] .luna {
+    transform: rotate(-25deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .indicador,
+    .opcion {
+      transition: none;
+    }
   }
 </style>
