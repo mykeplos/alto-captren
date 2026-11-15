@@ -1,0 +1,498 @@
+---
+// Clima en vivo de Captren: tiempo actual y pronóstico de 5 días.
+// Datos de Open-Meteo (gratis, sin clave). Se cargan en el navegador al abrir la página.
+import Icon from './Icon.astro';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+const LAT = -38.6397222;
+const LON = -71.7019444;
+const api =
+  `https://api.open-meteo.com/v1/forecast?latitude=${LAT}&longitude=${LON}` +
+  '&current=temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day,relative_humidity_2m' +
+  '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,snowfall_sum' +
+  '&timezone=America%2FSantiago&forecast_days=5';
+
+const t =
+  lang === 'es'
+    ? {
+        eyebrow: 'Clima en vivo',
+        titulo: 'Así está Captren ahora',
+        ahora: 'Ahora',
+        hoy: 'Hoy',
+        sensacion: 'Sensación',
+        viento: 'Viento',
+        humedad: 'Humedad',
+        lluvia: 'lluvia',
+        actualizado: 'Actualizado a las',
+        fuente: 'Datos de Open-Meteo',
+        error: 'No pudimos cargar el clima en este momento.',
+        consejoNieve: 'Se viene nieve en los próximos días: trae ropa de abrigo y cadenas para el auto.',
+        consejoLluvia: 'Días de lluvia: perfectos para la estufa a leña y los saltos de agua con más caudal.',
+        consejoSol: 'Buenos días para salir a caminar a Conguillío y al Salto Captren.',
+        estados: {
+          despejado: 'Despejado',
+          parcial: 'Parcialmente nublado',
+          nublado: 'Nublado',
+          niebla: 'Niebla',
+          llovizna: 'Llovizna',
+          lluvia: 'Lluvia',
+          chubascos: 'Chubascos',
+          nieve: 'Nieve',
+          tormenta: 'Tormenta',
+        },
+        dias: ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'],
+      }
+    : {
+        eyebrow: 'Live weather',
+        titulo: 'Captren right now',
+        ahora: 'Now',
+        hoy: 'Today',
+        sensacion: 'Feels like',
+        viento: 'Wind',
+        humedad: 'Humidity',
+        lluvia: 'rain',
+        actualizado: 'Updated at',
+        fuente: 'Data by Open-Meteo',
+        error: "We couldn't load the weather right now.",
+        consejoNieve: 'Snow is coming in the next few days: bring warm clothes and snow chains for the car.',
+        consejoLluvia: 'Rainy days: perfect for the wood stove and for waterfalls at full flow.',
+        consejoSol: 'Good days for hiking in Conguillío and visiting Captren waterfall.',
+        estados: {
+          despejado: 'Clear',
+          parcial: 'Partly cloudy',
+          nublado: 'Cloudy',
+          niebla: 'Fog',
+          llovizna: 'Drizzle',
+          lluvia: 'Rain',
+          chubascos: 'Showers',
+          nieve: 'Snow',
+          tormenta: 'Thunderstorm',
+        },
+        dias: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+      };
+
+// Íconos que puede usar el script (se copian desde estas plantillas)
+const iconos = [
+  'sun',
+  'moon',
+  'cloud-sun',
+  'cloud-moon',
+  'cloud',
+  'cloud-fog',
+  'cloud-drizzle',
+  'cloud-rain',
+  'cloud-snow',
+  'cloud-lightning',
+];
+---
+
+<section class="clima" data-clima data-api={api} data-textos={JSON.stringify(t)} aria-busy="true">
+  <div class="clima-cabeza">
+    <p class="eyebrow">{t.eyebrow}</p>
+    <h2>{t.titulo}</h2>
+  </div>
+
+  <div class="clima-cuerpo">
+    <div class="ahora">
+      <span class="ahora-icono" data-c="icono"><span class="esqueleto circulo"></span></span>
+      <div>
+        <p class="ahora-temp"><span data-c="temp"><span class="esqueleto linea-grande"></span></span></p>
+        <p class="ahora-estado" data-c="estado"><span class="esqueleto linea"></span></p>
+      </div>
+    </div>
+    <ul class="detalles">
+      <li><Icon name="thermometer" size={18} /> <span>{t.sensacion}</span> <strong data-c="sensacion">–</strong></li>
+      <li><Icon name="wind" size={18} /> <span>{t.viento}</span> <strong data-c="viento">–</strong></li>
+      <li><Icon name="droplets" size={18} /> <span>{t.humedad}</span> <strong data-c="humedad">–</strong></li>
+    </ul>
+  </div>
+
+  <ol class="pronostico" data-c="dias">
+    {Array.from({ length: 5 }).map(() => <li class="dia"><span class="esqueleto bloque"></span></li>)}
+  </ol>
+
+  <p class="consejo" data-c="consejo" hidden></p>
+  <p class="pie" data-c="pie">{t.fuente}</p>
+  <p class="error" data-c="error" hidden>{t.error}</p>
+
+  {
+    iconos.map((n) => (
+      <template data-icono={n}>
+        <Icon name={n} size={64} />
+      </template>
+    ))
+  }
+</section>
+
+<script is:inline>
+  (function () {
+    document.querySelectorAll('[data-clima]').forEach(function (caja) {
+      var t = JSON.parse(caja.getAttribute('data-textos'));
+      var api = caja.getAttribute('data-api');
+      function c(n) {
+        return caja.querySelector('[data-c="' + n + '"]');
+      }
+      function icono(nombre, tam) {
+        var tpl = caja.querySelector('template[data-icono="' + nombre + '"]');
+        var svg = tpl.content.firstElementChild.cloneNode(true);
+        svg.setAttribute('width', tam);
+        svg.setAttribute('height', tam);
+        return svg;
+      }
+      // Código del tiempo (WMO) → estado e ícono
+      function estado(cod, dia) {
+        if (cod === 0) return ['despejado', dia ? 'sun' : 'moon'];
+        if (cod <= 2) return ['parcial', dia ? 'cloud-sun' : 'cloud-moon'];
+        if (cod === 3) return ['nublado', 'cloud'];
+        if (cod <= 48) return ['niebla', 'cloud-fog'];
+        if (cod <= 57) return ['llovizna', 'cloud-drizzle'];
+        if (cod <= 67) return ['lluvia', 'cloud-rain'];
+        if (cod <= 77 || cod === 85 || cod === 86) return ['nieve', 'cloud-snow'];
+        if (cod <= 82) return ['chubascos', 'cloud-rain'];
+        return ['tormenta', 'cloud-lightning'];
+      }
+      function grados(x) {
+        return Math.round(x) + '°';
+      }
+
+      function pintar(d) {
+        var a = d.current;
+        var e = estado(a.weather_code, a.is_day === 1);
+        caja.setAttribute('data-estado', e[0]);
+        caja.setAttribute('data-dia', a.is_day === 1 ? 'si' : 'no');
+        c('icono').replaceChildren(icono(e[1], 64));
+        c('temp').textContent = grados(a.temperature_2m);
+        c('estado').textContent = t.estados[e[0]];
+        c('sensacion').textContent = grados(a.apparent_temperature);
+        c('viento').textContent = Math.round(a.wind_speed_10m) + ' km/h';
+        c('humedad').textContent = Math.round(a.relative_humidity_2m) + '%';
+
+        var dias = c('dias');
+        dias.replaceChildren();
+        var nieve = false;
+        var lluvia = 0;
+        d.daily.time.forEach(function (fecha, i) {
+          var ed = estado(d.daily.weather_code[i], true);
+          if (d.daily.snowfall_sum[i] > 0.5 || ed[0] === 'nieve') nieve = true;
+          if (d.daily.precipitation_probability_max[i] >= 60) lluvia++;
+          var li = document.createElement('li');
+          li.className = 'dia';
+          var nombre = document.createElement('span');
+          nombre.className = 'dia-nombre';
+          nombre.textContent = i === 0 ? t.hoy : t.dias[new Date(fecha + 'T12:00').getDay()];
+          var ic = document.createElement('span');
+          ic.className = 'dia-icono';
+          ic.title = t.estados[ed[0]];
+          ic.appendChild(icono(ed[1], 28));
+          var temps = document.createElement('span');
+          temps.className = 'dia-temps';
+          temps.innerHTML =
+            '<strong>' + grados(d.daily.temperature_2m_max[i]) + '</strong> <span>' + grados(d.daily.temperature_2m_min[i]) + '</span>';
+          var pp = document.createElement('span');
+          pp.className = 'dia-lluvia';
+          pp.textContent = Math.round(d.daily.precipitation_probability_max[i] || 0) + '%';
+          var palabra = document.createElement('span');
+          palabra.className = 'dia-palabra';
+          palabra.textContent = ' ' + t.lluvia;
+          pp.appendChild(palabra);
+          li.append(nombre, ic, temps, pp);
+          dias.appendChild(li);
+        });
+
+        var consejo = c('consejo');
+        consejo.textContent = nieve ? t.consejoNieve : lluvia >= 3 ? t.consejoLluvia : t.consejoSol;
+        consejo.hidden = false;
+        var hora = a.time.slice(11, 16);
+        c('pie').textContent = t.actualizado + ' ' + hora + ' · ' + t.fuente;
+        caja.removeAttribute('aria-busy');
+      }
+
+      // Guarda la respuesta 15 minutos para no pedirla en cada página
+      var clave = 'clima-captren';
+      try {
+        var guardado = JSON.parse(sessionStorage.getItem(clave) || 'null');
+        if (guardado && Date.now() - guardado.cuando < 15 * 60 * 1000) {
+          pintar(guardado.datos);
+          return;
+        }
+      } catch (e) {}
+
+      fetch(api)
+        .then(function (r) {
+          if (!r.ok) throw new Error(r.status);
+          return r.json();
+        })
+        .then(function (datos) {
+          pintar(datos);
+          try {
+            sessionStorage.setItem(clave, JSON.stringify({ cuando: Date.now(), datos: datos }));
+          } catch (e) {}
+        })
+        .catch(function () {
+          caja.classList.add('sin-datos');
+          c('error').hidden = false;
+          caja.removeAttribute('aria-busy');
+        });
+    });
+  })();
+</script>
+
+<style>
+  .clima {
+    position: relative;
+    overflow: hidden;
+    padding: clamp(1.4rem, 3vw, 2.4rem);
+    border-radius: 24px;
+    color: #f7f5f0;
+    background:
+      radial-gradient(120% 120% at 100% 0%, rgb(255 255 255 / 0.12), transparent 55%),
+      linear-gradient(135deg, #24465a, #1f3a2e);
+    box-shadow: 0 20px 50px rgb(0 0 0 / 0.18);
+    transition: background 0.6s ease;
+  }
+
+  /* El fondo cambia según el tiempo */
+  .clima[data-estado='despejado'][data-dia='si'],
+  .clima[data-estado='parcial'][data-dia='si'] {
+    background:
+      radial-gradient(120% 120% at 100% 0%, rgb(255 214 120 / 0.35), transparent 55%),
+      linear-gradient(135deg, #2f6f93, #1f3a2e);
+  }
+
+  .clima[data-estado='nieve'] {
+    background:
+      radial-gradient(120% 120% at 100% 0%, rgb(255 255 255 / 0.25), transparent 55%),
+      linear-gradient(135deg, #4b6578, #22313b);
+  }
+
+  .clima[data-dia='no'] {
+    background:
+      radial-gradient(120% 120% at 100% 0%, rgb(140 160 255 / 0.18), transparent 55%),
+      linear-gradient(135deg, #18203e, #0f1d17);
+  }
+
+  .clima-cabeza .eyebrow {
+    color: #e2b07a;
+    margin: 0;
+  }
+
+  .clima-cabeza h2 {
+    margin: 0.2rem 0 1.2rem;
+    color: #fff;
+    font-size: clamp(1.5rem, 3vw, 2rem);
+  }
+
+  .clima-cuerpo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.2rem 2rem;
+  }
+
+  .ahora {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .ahora-icono {
+    display: grid;
+    place-items: center;
+    width: 76px;
+    height: 76px;
+    color: #ffd98a;
+  }
+
+  .ahora-temp {
+    margin: 0;
+    font-family: var(--fuente-titulos);
+    font-size: clamp(3rem, 7vw, 4.2rem);
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .ahora-estado {
+    margin: 0.3rem 0 0;
+    font-family: var(--fuente-ui);
+    font-weight: 600;
+    opacity: 0.9;
+  }
+
+  .detalles {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.45rem;
+    font-size: 0.92rem;
+  }
+
+  .detalles li {
+    display: grid;
+    grid-template-columns: 20px 1fr auto;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 210px;
+  }
+
+  .detalles span {
+    opacity: 0.75;
+  }
+
+  .pronostico {
+    list-style: none;
+    margin: 1.6rem 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+
+  .pronostico :global(.dia) {
+    display: grid;
+    justify-items: center;
+    gap: 0.35rem;
+    padding: 0.8rem 0.4rem;
+    border-radius: 16px;
+    background: rgb(255 255 255 / 0.08);
+    border: 1px solid rgb(255 255 255 / 0.1);
+    text-align: center;
+    min-height: 128px;
+  }
+
+  .pronostico :global(.dia:first-child) {
+    background: rgb(255 255 255 / 0.16);
+  }
+
+  .pronostico :global(.dia-nombre) {
+    font-family: var(--fuente-ui);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+
+  .pronostico :global(.dia-icono) {
+    color: #ffd98a;
+    display: grid;
+  }
+
+  .pronostico :global(.dia-temps) {
+    font-size: 0.95rem;
+  }
+
+  .pronostico :global(.dia-temps span) {
+    opacity: 0.6;
+  }
+
+  .pronostico :global(.dia-lluvia) {
+    font-size: 0.72rem;
+    opacity: 0.7;
+  }
+
+  .consejo {
+    margin: 1.2rem 0 0;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    background: rgb(0 0 0 / 0.18);
+    font-size: 0.92rem;
+  }
+
+  .pie {
+    margin: 0.9rem 0 0;
+    font-size: 0.75rem;
+    opacity: 0.6;
+  }
+
+  .error {
+    margin: 0.5rem 0 0;
+  }
+
+  .sin-datos .clima-cuerpo,
+  .sin-datos .pronostico {
+    display: none;
+  }
+
+  /* Esqueleto mientras carga */
+  .esqueleto {
+    display: inline-block;
+    border-radius: 8px;
+    background: linear-gradient(90deg, rgb(255 255 255 / 0.08), rgb(255 255 255 / 0.2), rgb(255 255 255 / 0.08));
+    background-size: 200% 100%;
+    animation: brillo 1.4s ease infinite;
+  }
+
+  .circulo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+  }
+
+  .linea-grande {
+    width: 110px;
+    height: 3.2rem;
+  }
+
+  .linea {
+    width: 140px;
+    height: 1rem;
+  }
+
+  .bloque {
+    width: 100%;
+    height: 100px;
+  }
+
+  @keyframes brillo {
+    to {
+      background-position: -200% 0;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .pronostico {
+      gap: 0.35rem;
+    }
+
+    .pronostico :global(.dia) {
+      padding: 0.65rem 0.15rem;
+      min-height: 0;
+    }
+
+    .pronostico :global(.dia-nombre) {
+      font-size: 0.68rem;
+      letter-spacing: 0.04em;
+    }
+
+    .pronostico :global(.dia-temps) {
+      font-size: 0.82rem;
+    }
+
+    .pronostico :global(.dia-palabra) {
+      display: none;
+    }
+
+    .detalles li {
+      min-width: 0;
+    }
+
+    .clima-cuerpo {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .esqueleto {
+      animation: none;
+    }
+  }
+</style>
