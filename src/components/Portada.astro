@@ -9,6 +9,7 @@ import { url } from '../lib/url';
 import Icon from './Icon.astro';
 import CabanaDatos from './CabanaDatos.astro';
 import Logo from './Logo.astro';
+import GaleriaPortada from './GaleriaPortada.astro';
 
 interface Props {
   lang: Lang;
@@ -283,6 +284,8 @@ const reservar = url(`${lang}/reservar/`);
     <p><a class="ver-mas ver-mas-claro" href={url(`${lang}/actividades/`)}>{textos.verActividades} →</a></p>
   </div>
 </section>
+
+<GaleriaPortada lang={lang} />
 
 <section class="cta">
   <Image src={fotoInvierno} alt={textos.inviernoAlt} widths={[640, 1280]} sizes="100vw" class="cta-foto" />

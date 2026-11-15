@@ -1,0 +1,133 @@
+---
+// Galería de la portada: mosaico de fotos que se abren en el visor a pantalla completa.
+import { galeria } from '../data/fotos';
+import type { Lang } from '../i18n/ui';
+import FotoAmpliable from './FotoAmpliable.astro';
+import Icon from './Icon.astro';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t =
+  lang === 'es'
+    ? {
+        eyebrow: 'Galería',
+        titulo: 'Mira el lugar antes de llegar',
+        intro: 'Las cabañas, el volcán Llaima y los saltos de agua del sector.',
+        ver: `Ver las ${galeria.length} fotos`,
+      }
+    : {
+        eyebrow: 'Gallery',
+        titulo: 'See the place before you arrive',
+        intro: 'The cabins, Llaima volcano and the waterfalls nearby.',
+        ver: `See all ${galeria.length} photos`,
+      };
+---
+
+<section class="container seccion galeria-portada" id="galeria">
+  <div class="cabeza" data-revelar>
+    <div>
+      <p class="eyebrow">{t.eyebrow}</p>
+      <h2>{t.titulo}</h2>
+      <p class="intro">{t.intro}</p>
+    </div>
+    <button class="btn btn-outline ver-todas" type="button" data-abrir-galeria="portada">
+      <Icon name="images" size={18} />
+      {t.ver}
+    </button>
+  </div>
+  <div class="mosaico" data-revelar-grupo>
+    {
+      galeria.map((foto, i) => (
+        <FotoAmpliable
+          foto={foto}
+          lang={lang}
+          grupo="portada"
+          widths={i === 0 ? [480, 800, 1200] : [360, 640]}
+          sizes={i === 0 ? '(min-width: 900px) 600px, 100vw' : '(min-width: 900px) 300px, 50vw'}
+          class={`pieza pieza-${i + 1}`}
+        />
+      ))
+    }
+  </div>
+</section>
+
+<script is:inline>
+  // El botón "Ver las fotos" abre el visor en la primera foto
+  document.addEventListener('click', function (e) {
+    var b = e.target.closest && e.target.closest('[data-abrir-galeria]');
+    if (!b) return;
+    var primera = document.querySelector('a[data-galeria="' + b.getAttribute('data-abrir-galeria') + '"]');
+    if (primera) primera.click();
+  });
+</script>
+
+<style>
+  .cabeza {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.8rem;
+  }
+
+  .cabeza h2 {
+    margin: 0.2rem 0 0.4rem;
+  }
+
+  .cabeza .intro {
+    margin: 0;
+  }
+
+  .ver-todas:hover {
+    background: var(--chip);
+  }
+
+  .ver-todas {
+    color: var(--titulo);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .mosaico {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-auto-rows: 210px;
+    gap: 0.8rem;
+  }
+
+  .mosaico :global(.pieza-1) {
+    grid-column: span 2;
+    grid-row: span 2;
+  }
+
+  .mosaico :global(.pieza-3) {
+    grid-row: span 2;
+  }
+
+  @media (max-width: 900px) {
+    .mosaico {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-auto-rows: 150px;
+      gap: 0.6rem;
+    }
+
+    .mosaico :global(.pieza-1),
+    .mosaico :global(.pieza:last-child) {
+      grid-column: span 2;
+      grid-row: span 1;
+    }
+
+    .mosaico :global(.pieza-1) {
+      grid-row: span 2;
+    }
+
+    .mosaico :global(.pieza-3) {
+      grid-row: span 1;
+    }
+  }
+</style>
