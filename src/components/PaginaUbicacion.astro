@@ -9,9 +9,10 @@ const { lang } = Astro.props;
 
 // TODO(#6): reemplazar por la ubicación exacta de las cabañas cuando el dueño comparta el pin de Google Maps.
 // Por ahora: Laguna Captren, en la entrada norte del Parque Nacional Conguillío (las cabañas quedan a ~10 min).
-// Ojo: buscar solo "Captrén, Curacautín" pone el pin en un lugar equivocado, cerca del pueblo.
+// Ojo: el mapa insertado convierte un nombre o unas coordenadas sueltas en un "lugar" de Google, y
+// "Laguna Captren" queda mal ubicado (en Curacautín). El prefijo `loc:` fuerza el pin en las coordenadas exactas.
 const consultaMapa = '-38.6397222,-71.7019444';
-const mapa = `https://maps.google.com/maps?q=${encodeURIComponent(consultaMapa)}&z=11&output=embed`;
+const mapa = `https://maps.google.com/maps?q=loc:${consultaMapa}&z=11&output=embed`;
 const abrirMapa = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(consultaMapa)}`;
 
 const textos = {
