@@ -1,5 +1,8 @@
 ---
+import '@fontsource-variable/inter';
+import '@fontsource-variable/fraunces';
 import '../styles/global.css';
+import Icon from '../components/Icon.astro';
 import { otherLang, useTranslations, type Lang } from '../i18n/ui';
 import { url } from '../lib/url';
 
@@ -54,7 +57,7 @@ const current = Astro.url.pathname;
           <span class="sr-only">{t('lang.switch')}</span>
         </a>
         <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="menu-principal">
-          <span aria-hidden="true">☰</span>
+          <Icon name="menu" size={26} />
           <span class="sr-only">{t('nav.menu')}</span>
         </button>
         <nav id="menu-principal" class="nav" aria-label={t('nav.menu')}>

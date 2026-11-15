@@ -1,5 +1,6 @@
 ---
 import type { Lang } from '../i18n/ui';
+import Icon from './Icon.astro';
 
 interface Props {
   lang: Lang;
@@ -58,7 +59,7 @@ const textos = {
       ))
     }
   </div>
-  <p class="otra">💬 {textos.otra}</p>
+  <p class="otra"><Icon name="message-circle" size={20} /> {textos.otra}</p>
 </section>
 
 <style>
@@ -101,7 +102,11 @@ const textos = {
   }
 
   .otra {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     margin-top: 1.6rem;
     font-weight: 600;
+    color: var(--bosque);
   }
 </style>

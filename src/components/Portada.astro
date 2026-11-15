@@ -4,6 +4,8 @@ import fotoPortada from '../assets/portada-llaima.jpg';
 import { cabanas, clp, precioDesde } from '../data/cabanas';
 import type { Lang } from '../i18n/ui';
 import { url } from '../lib/url';
+import Icon from './Icon.astro';
+import CabanaDatos from './CabanaDatos.astro';
 
 interface Props {
   lang: Lang;
@@ -23,12 +25,12 @@ const textos = {
     verCabanas: 'Ver cabañas',
     destacadosTitulo: 'Lo que vas a encontrar',
     destacados: [
-      ['🌋', 'Vista al volcán', 'Despierta frente a la cordillera.'],
-      ['🌲', 'Conguillío a 10 min', 'Araucarias, lagunas y senderos.'],
-      ['💧', 'Salto Captren', 'A pocos minutos de las cabañas.'],
-      ['🔥', 'Estufa a leña', 'Calor de verdad, también con nieve.'],
-      ['📶', 'Wifi', 'Para conectarte cuando quieras.'],
-      ['🐾', 'Se aceptan mascotas', 'Tu perro también está de vacaciones.'],
+      ['mountain-snow', 'Vista al volcán', 'Despierta frente a la cordillera.'],
+      ['trees', 'Conguillío a 10 min', 'Araucarias, lagunas y senderos.'],
+      ['droplets', 'Salto Captren', 'A pocos minutos de las cabañas.'],
+      ['flame', 'Estufa a leña', 'Calor de verdad, también con nieve.'],
+      ['wifi', 'Wifi', 'Para conectarte cuando quieras.'],
+      ['paw-print', 'Se aceptan mascotas', 'Tu perro también está de vacaciones.'],
     ],
     cabanasTitulo: 'Nuestras cabañas',
     cabanasIntro:
@@ -60,12 +62,12 @@ const textos = {
     verCabanas: 'See the cabins',
     destacadosTitulo: 'What you will find',
     destacados: [
-      ['🌋', 'Volcano views', 'Wake up facing the Andes.'],
-      ['🌲', 'Conguillío, 10 min away', 'Monkey puzzle trees, lakes and trails.'],
-      ['💧', 'Captren waterfall', 'Just a few minutes from the cabins.'],
-      ['🔥', 'Wood stove', 'Real warmth, even when it snows.'],
-      ['📶', 'Wifi', 'Stay connected whenever you want.'],
-      ['🐾', 'Pet friendly', 'Your dog is on holiday too.'],
+      ['mountain-snow', 'Volcano views', 'Wake up facing the Andes.'],
+      ['trees', 'Conguillío, 10 min away', 'Monkey puzzle trees, lakes and trails.'],
+      ['droplets', 'Captren waterfall', 'Just a few minutes from the cabins.'],
+      ['flame', 'Wood stove', 'Real warmth, even when it snows.'],
+      ['wifi', 'Wifi', 'Stay connected whenever you want.'],
+      ['paw-print', 'Pet friendly', 'Your dog is on holiday too.'],
     ],
     cabanasTitulo: 'Our cabins',
     cabanasIntro:
@@ -121,8 +123,8 @@ const textos = {
     {
       textos.destacados.map(([icono, titulo, texto]) => (
         <li>
-          <span class="icono" aria-hidden="true">
-            {icono}
+          <span class="icono-caja">
+            <Icon name={icono} size={24} />
           </span>
           <strong>{titulo}</strong>
           <span>{texto}</span>
@@ -144,9 +146,7 @@ const textos = {
           </div>
           <div class="tarjeta-cuerpo">
             <h3>{c.nombre[lang]}</h3>
-            <p class="datos">
-              👥 {c.capacidad} {textos.personas} · 🛏️ {c.dormitorios} {textos.dormitorios} · 🚿 {c.banos} {textos.bano}
-            </p>
+            <CabanaDatos cabana={c} lang={lang} />
             <ul class="camas">
               {c.piezas.map((p) => (
                 <li>{p[lang]}</li>
@@ -305,8 +305,15 @@ const textos = {
     box-shadow: var(--sombra);
   }
 
-  .destacados .icono {
-    font-size: 1.8rem;
+  .icono-caja {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 0.5rem;
+    border-radius: 12px;
+    background: var(--crema);
+    color: var(--bosque);
   }
 
   .destacados span:last-child {
@@ -334,7 +341,7 @@ const textos = {
     place-items: center;
     background: linear-gradient(135deg, var(--bosque-claro), var(--madera));
     color: rgb(255 255 255 / 0.85);
-    font-family: Georgia, serif;
+    font-family: var(--fuente-titulos);
     font-size: 1.6rem;
   }
 

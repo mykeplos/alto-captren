@@ -1,5 +1,6 @@
 ---
 import type { Lang } from '../i18n/ui';
+import Icon from './Icon.astro';
 
 interface Props {
   lang: Lang;
@@ -26,7 +27,7 @@ const textos = {
     nota: 'Tiempos aproximados en auto desde las cabañas. Revisa horarios, tarifas y cierres del Parque Nacional Conguillío en el sitio de CONAF antes de ir.',
     actividades: [
       {
-        icono: '🌲',
+        icono: 'trees',
         titulo: 'Parque Nacional Conguillío',
         distancia: '10 min (entrada Captren)',
         texto:
@@ -34,56 +35,56 @@ const textos = {
         temporada: 'todo',
       },
       {
-        icono: '🥾',
+        icono: 'footprints',
         titulo: 'Laguna Captren y sendero Los Carpinteros',
         distancia: 'Dentro del parque',
         texto: 'Sendero de unos 6 km entre araucarias milenarias que parte en la Laguna Captren.',
         temporada: 'verano',
       },
       {
-        icono: '💧',
+        icono: 'droplets',
         titulo: 'Salto Captren',
         distancia: 'A pocos minutos',
         texto: 'Salto de agua muy cerca de las cabañas, ideal para una caminata corta.',
         temporada: 'todo',
       },
       {
-        icono: '♨️',
+        icono: 'bath',
         titulo: 'Termas de Manzanar y Malalcahuello',
         distancia: 'Aprox. 45 min a 1 h',
         texto: 'Piscinas termales para relajarse, especialmente ricas en invierno.',
         temporada: 'todo',
       },
       {
-        icono: '🏞️',
+        icono: 'waves',
         titulo: 'Salto del Indio y Salto de la Princesa',
         distancia: 'Aprox. 45 min',
         texto: 'Dos saltos de agua junto a la ruta 181, camino a Malalcahuello.',
         temporada: 'todo',
       },
       {
-        icono: '🎿',
+        icono: 'mountain-snow',
         titulo: 'Centro de ski Corralco',
         distancia: 'Aprox. 1 h',
         texto: 'Ski y snowboard en las faldas del volcán Lonquimay. En verano, trekking y paseos.',
         temporada: 'invierno',
       },
       {
-        icono: '⛰️',
+        icono: 'tent-tree',
         titulo: 'Reserva Nacional Malalcahuello',
         distancia: 'Aprox. 1 h',
         texto: 'Senderos entre bosque nativo y arenales volcánicos.',
         temporada: 'verano',
       },
       {
-        icono: '☃️',
+        icono: 'snowflake',
         titulo: 'Nieve en las cabañas',
         distancia: 'Aquí mismo',
         texto: 'En invierno el sector se cubre de nieve: perfecto para jugar con niños y terminar el día junto a la estufa.',
         temporada: 'invierno',
       },
       {
-        icono: '🏘️',
+        icono: 'store',
         titulo: 'Curacautín',
         distancia: 'Aprox. 30 min',
         texto: 'El pueblo más cercano: supermercado, restaurantes, farmacia y bencinera.',
@@ -99,7 +100,7 @@ const textos = {
     nota: 'Approximate driving times from the cabins. Check opening hours, fees and closures of Conguillío National Park on the CONAF website before you go.',
     actividades: [
       {
-        icono: '🌲',
+        icono: 'trees',
         titulo: 'Conguillío National Park',
         distancia: '10 min (Captren entrance)',
         texto:
@@ -107,56 +108,56 @@ const textos = {
         temporada: 'todo',
       },
       {
-        icono: '🥾',
+        icono: 'footprints',
         titulo: 'Captren Lake and Los Carpinteros trail',
         distancia: 'Inside the park',
         texto: 'A trail of about 6 km among ancient monkey puzzle trees, starting at Captren Lake.',
         temporada: 'verano',
       },
       {
-        icono: '💧',
+        icono: 'droplets',
         titulo: 'Captren waterfall',
         distancia: 'A few minutes away',
         texto: 'A waterfall very close to the cabins, great for a short walk.',
         temporada: 'todo',
       },
       {
-        icono: '♨️',
+        icono: 'bath',
         titulo: 'Manzanar and Malalcahuello hot springs',
         distancia: 'Approx. 45 min to 1 h',
         texto: 'Thermal pools to relax, especially lovely in winter.',
         temporada: 'todo',
       },
       {
-        icono: '🏞️',
+        icono: 'waves',
         titulo: 'Salto del Indio and Salto de la Princesa',
         distancia: 'Approx. 45 min',
         texto: 'Two waterfalls along route 181, on the way to Malalcahuello.',
         temporada: 'todo',
       },
       {
-        icono: '🎿',
+        icono: 'mountain-snow',
         titulo: 'Corralco ski resort',
         distancia: 'Approx. 1 h',
         texto: 'Skiing and snowboarding on the slopes of Lonquimay volcano. Hiking in summer.',
         temporada: 'invierno',
       },
       {
-        icono: '⛰️',
+        icono: 'tent-tree',
         titulo: 'Malalcahuello National Reserve',
         distancia: 'Approx. 1 h',
         texto: 'Trails through native forest and volcanic sand fields.',
         temporada: 'verano',
       },
       {
-        icono: '☃️',
+        icono: 'snowflake',
         titulo: 'Snow at the cabins',
         distancia: 'Right here',
         texto: 'In winter the area is covered in snow: perfect for kids, and for ending the day by the stove.',
         temporada: 'invierno',
       },
       {
-        icono: '🏘️',
+        icono: 'store',
         titulo: 'Curacautín',
         distancia: 'Approx. 30 min',
         texto: 'The nearest town: supermarket, restaurants, pharmacy and petrol station.',
@@ -175,13 +176,15 @@ const textos = {
     {
       textos.actividades.map((a) => (
         <li class="actividad">
-          <span class="icono" aria-hidden="true">
-            {a.icono}
+          <span class="icono-caja">
+            <Icon name={a.icono} size={26} />
           </span>
           <div>
             <h2>{a.titulo}</h2>
             <p class="meta">
-              <span>📍 {a.distancia}</span>
+              <span class="distancia">
+                <Icon name="map-pin" size={15} /> {a.distancia}
+              </span>
               <span class={`etiqueta ${a.temporada}`}>{textos.temporadas[a.temporada]}</span>
             </p>
             <p>{a.texto}</p>
@@ -226,9 +229,21 @@ const textos = {
     box-shadow: var(--sombra);
   }
 
-  .icono {
-    font-size: 2rem;
-    line-height: 1;
+  .icono-caja {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--crema);
+    color: var(--bosque);
+  }
+
+  .distancia {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
   }
 
   .actividad h2 {

@@ -10,6 +10,8 @@
   --radio: 14px;
   --sombra: 0 6px 24px rgb(0 0 0 / 0.08);
   --ancho: 1100px;
+  --fuente-texto: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
+  --fuente-titulos: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
   color-scheme: light;
 }
 
@@ -30,19 +32,28 @@ html {
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: var(--fuente-texto);
   font-size: 1.0625rem;
-  line-height: 1.6;
+  line-height: 1.65;
   color: var(--texto);
   background: var(--nieve);
+  -webkit-font-smoothing: antialiased;
 }
 
 h1,
 h2,
 h3 {
-  font-family: Georgia, 'Times New Roman', serif;
-  line-height: 1.2;
+  font-family: var(--fuente-titulos);
+  font-weight: 600;
+  font-optical-sizing: auto;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
   color: var(--bosque);
+}
+
+.icono {
+  flex: none;
+  vertical-align: middle;
 }
 
 a {
@@ -91,7 +102,7 @@ svg {
   gap: 0.5rem;
   color: var(--nieve);
   text-decoration: none;
-  font-family: Georgia, serif;
+  font-family: var(--fuente-titulos);
   font-weight: 700;
   font-size: 1.1rem;
   margin-right: auto;
@@ -233,7 +244,7 @@ svg {
 }
 
 .footer-name {
-  font-family: Georgia, serif;
+  font-family: var(--fuente-titulos);
   font-size: 1.2rem;
   color: #fff;
 }
