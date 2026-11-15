@@ -2,6 +2,7 @@
 import Banner from './Banner.astro';
 import fotoBanner from '../assets/portada-llaima.jpg';
 import FormReserva from './FormReserva.astro';
+import Calendario from './Calendario.astro';
 import Icon from './Icon.astro';
 import type { Lang } from '../i18n/ui';
 
@@ -50,6 +51,7 @@ const t = {
 
 <section class="container pagina">
 
+  <Calendario lang={lang} />
   <FormReserva lang={lang} />
 
   <h2>{t.pasosTitulo}</h2>

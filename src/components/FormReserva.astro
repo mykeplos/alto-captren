@@ -43,6 +43,7 @@ const t = {
     errPersonas: 'Esta cabaña recibe hasta {n} personas.',
     errNombre: 'Escribe tu nombre.',
     errFaltan: 'Completa las fechas de llegada y salida.',
+    errOcupado: 'Algunas de esas noches ya están reservadas. Revisa el calendario de disponibilidad.',
     msgHola: 'Hola, quiero reservar en Cabañas Alto Captren.',
     msgPregunta: '¿Está disponible?',
     msgMascota: 'Mascota',
@@ -80,6 +81,7 @@ const t = {
     errPersonas: 'This cabin sleeps up to {n} guests.',
     errNombre: 'Please enter your name.',
     errFaltan: 'Please choose your check-in and check-out dates.',
+    errOcupado: 'Some of those nights are already booked. Check the availability calendar.',
     msgHola: 'Hi, I would like to book at Alto Captren Cabins.',
     msgPregunta: 'Is it available?',
     msgMascota: 'Pet',
@@ -259,6 +261,10 @@ const maxPersonas = Math.max(...cabanas.map((c) => c.capacidad));
       if (sal <= lleg) return error(t.errFechas);
       var r = calcular();
       if (r.altas > 0 && r.noches < 2) return error(t.errMinimo);
+      var ocup = window.altoCaptrenOcupado && window.altoCaptrenOcupado[r.c.id];
+      if (ocup) {
+        for (var dia = lleg; dia < sal; dia = sumarDias(dia, 1)) if (ocup.has(dia)) return error(t.errOcupado);
+      }
       var personas = Number(campo('personas').value);
       if (!personas || personas < 1 || personas > r.c.capacidad) return error(t.errPersonas.replace('{n}', r.c.capacidad));
       var nombre = campo('nombre').value.trim();
