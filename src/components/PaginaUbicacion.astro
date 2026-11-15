@@ -4,6 +4,7 @@ import fotoBanner from '../assets/volcan-camino.jpg';
 import type { Lang } from '../i18n/ui';
 import Icon from './Icon.astro';
 import Clima from './Clima.astro';
+import MapaRuta from './MapaRuta.astro';
 
 interface Props {
   lang: Lang;
@@ -92,6 +93,10 @@ const textos = {
   </div>
   <p class="nota">{textos.mapaNota}</p>
   <p><a class="btn" href={abrirMapa} target="_blank" rel="noopener">{textos.abrirMapa}</a></p>
+
+  <div data-revelar>
+    <MapaRuta lang={lang} />
+  </div>
 
   <h2>{textos.rutasTitulo}</h2>
   <dl class="rutas" data-revelar-grupo>

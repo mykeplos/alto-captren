@@ -1,0 +1,462 @@
+---
+// Mapa ilustrado de cómo llegar: Temuco → Curacautín → Cabañas (Km 19) → Conguillío.
+// Es un esquema (no a escala). Tiempos y distancias iguales a los de la sección "Cómo llegar".
+import Icon from './Icon.astro';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+const t = {
+  es: {
+    eyebrow: 'Ruta',
+    titulo: 'El camino hasta las cabañas',
+    aviso: 'Esquema de la ruta, no está a escala.',
+    tramos: ['aprox. 1 h 15 min', '20 km · 30 min', '10 min'],
+    paradas: [
+      {
+        nombre: 'Temuco',
+        icono: 'plane',
+        texto: 'Aeropuerto y buses. Sigue por Lautaro hasta Curacautín.',
+      },
+      {
+        nombre: 'Curacautín',
+        icono: 'shopping-cart',
+        texto: 'Haz las compras aquí: supermercado, farmacia y bencinera. Desde Santiago llegas por Victoria y la ruta 181.',
+      },
+      {
+        nombre: 'Cabañas Alto Captren',
+        icono: 'house',
+        texto: 'Ruta R-925-S, Km 19. Desde Curacautín son unos 20 km, parte de ripio.',
+      },
+      {
+        nombre: 'Parque Conguillío',
+        icono: 'trees',
+        texto: 'Entrada Captren y Laguna Captren, con senderos entre araucarias.',
+      },
+    ],
+    resumen:
+      'Ruta: Temuco, aprox. 1 h 15 min hasta Curacautín; luego 20 km y 30 minutos por la ruta R-925-S hasta las cabañas en el Km 19; y 10 minutos más hasta la entrada Captren del Parque Conguillío.',
+  },
+  en: {
+    eyebrow: 'Route',
+    titulo: 'The road to the cabins',
+    aviso: 'Route diagram, not to scale.',
+    tramos: ['approx. 1 h 15 min', '20 km · 30 min', '10 min'],
+    paradas: [
+      {
+        nombre: 'Temuco',
+        icono: 'plane',
+        texto: 'Airport and buses. Continue via Lautaro to Curacautín.',
+      },
+      {
+        nombre: 'Curacautín',
+        icono: 'shopping-cart',
+        texto: 'Do your shopping here: supermarket, pharmacy and petrol station. From Santiago, come via Victoria and route 181.',
+      },
+      {
+        nombre: 'Alto Captren Cabins',
+        icono: 'house',
+        texto: 'Route R-925-S, Km 19. About 20 km from Curacautín, partly gravel.',
+      },
+      {
+        nombre: 'Conguillío Park',
+        icono: 'trees',
+        texto: 'Captren entrance and Captren Lake, with trails among monkey puzzle trees.',
+      },
+    ],
+    resumen:
+      'Route: from Temuco, approx. 1 h 15 min to Curacautín; then 20 km and 30 minutes on route R-925-S to the cabins at Km 19; and 10 more minutes to the Captren entrance of Conguillío Park.',
+  },
+}[lang];
+
+// Posición de cada parada en el dibujo (viewBox 1000 × 300)
+const puntos = [
+  [125, 252],
+  [375, 214],
+  [625, 246],
+  [875, 206],
+];
+// Posición de los textos de cada tramo
+const etiquetas = [
+  [250, 196],
+  [500, 192],
+  [750, 190],
+];
+// Araucarias decorativas: [x, y, tamaño]
+const arboles = [
+  [30, 236, 0.8],
+  [60, 270, 1],
+  [92, 282, 0.8],
+  [205, 284, 0.9],
+  [290, 268, 1],
+  [470, 280, 0.9],
+  [540, 270, 1.1],
+  [575, 284, 0.8],
+  [705, 280, 1],
+  [745, 270, 0.8],
+  [950, 252, 1],
+  [978, 262, 0.8],
+]
+---
+
+<section class="mapa-ruta" aria-labelledby="mapa-ruta-titulo">
+  <p class="eyebrow">{t.eyebrow}</p>
+  <h2 id="mapa-ruta-titulo">{t.titulo}</h2>
+
+  <svg class="dibujo" viewBox="0 0 1000 300" role="img" aria-label={t.resumen}>
+    <!-- Cerros del fondo -->
+    <path class="cerro" d="M0 240 Q90 170 200 215 Q300 160 420 200 Q520 175 640 215 L640 300 L0 300 Z"></path>
+    <!-- Volcán Llaima -->
+    <path class="volcan" d="M640 250 L790 78 Q830 50 870 78 L1000 230 L1000 300 L640 300 Z"></path>
+    <path class="nieve" d="M790 78 Q830 50 870 78 L894 106 L872 96 L856 112 L838 98 L818 114 L804 100 L772 112 Z"></path>
+    <!-- Suelo -->
+    <path class="suelo" d="M0 250 Q250 205 500 232 Q750 255 1000 215 L1000 300 L0 300 Z"></path>
+
+    <!-- Araucarias -->
+    {
+      arboles.map(([x, y, s]) => (
+        <g class="arbol" transform={`translate(${x} ${y}) scale(${s})`}>
+          <rect x="-1.5" y="-4" width="3" height="16"></rect>
+          <path d="M-14 -4 Q0 -10 14 -4 M-11 -14 Q0 -20 11 -14 M-8 -24 Q0 -29 8 -24 M-4 -32 Q0 -35 4 -32"></path>
+        </g>
+      ))
+    }
+
+    <!-- Camino -->
+    <path
+      class="camino"
+      d="M125 252 C 220 252, 280 214, 375 214 S 540 246, 625 246 S 790 206, 875 206"
+    ></path>
+    <path
+      class="camino-linea"
+      d="M125 252 C 220 252, 280 214, 375 214 S 540 246, 625 246 S 790 206, 875 206"
+    ></path>
+
+    <!-- Tiempos de cada tramo -->
+    {
+      etiquetas.map(([x, y], i) => (
+        <g class="tramo" transform={`translate(${x} ${y})`}>
+          <rect x="-78" y="-17" width="156" height="30" rx="15"></rect>
+          <text y="4" text-anchor="middle">
+            {t.tramos[i]}
+          </text>
+        </g>
+      ))
+    }
+
+    <!-- Paradas -->
+    {
+      puntos.map(([x, y], i) => (
+        <g class:list={['parada', { destino: i === 2 }]} transform={`translate(${x} ${y})`}>
+          {i === 2 && <circle class="pulso" r="22"></circle>}
+          <circle r={i === 2 ? 20 : 15}></circle>
+          <text y="5" text-anchor="middle">
+            {i + 1}
+          </text>
+        </g>
+      ))
+    }
+  </svg>
+
+  <ol class="paradas">
+    {
+      t.paradas.map((p, i) => (
+        <li class:list={{ destino: i === 2 }}>
+          <span class="numero" aria-hidden="true">
+            {i + 1}
+          </span>
+          <div>
+            <h3>
+              <Icon name={p.icono} size={18} />
+              {p.nombre}
+            </h3>
+            <p>{p.texto}</p>
+            {i < 3 && (
+              <p class="siguiente">
+                <Icon name="arrow-down" size={14} class="flecha-movil" />
+                {t.tramos[i]}
+              </p>
+            )}
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+  <p class="aviso">{t.aviso}</p>
+</section>
+
+<style>
+  .mapa-ruta {
+    --cerro: #cfe0d2;
+    --volcan: #8fa79a;
+    --suelo: #e3ecdc;
+    --arbol: #2f5643;
+    --camino: #5b5f5c;
+    margin: 2.5rem 0;
+    padding: clamp(1.3rem, 3vw, 2.2rem);
+    border-radius: 24px;
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    box-shadow: var(--sombra);
+  }
+
+  :global(:root[data-tema='noche']) .mapa-ruta {
+    --cerro: #1f3329;
+    --volcan: #2c4237;
+    --suelo: #1a2a22;
+    --arbol: #6fa384;
+    --camino: #0b120e;
+  }
+
+  .mapa-ruta h2 {
+    margin: 0.2rem 0 1rem;
+  }
+
+  .eyebrow {
+    margin: 0;
+  }
+
+  .dibujo {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 16px;
+    background: linear-gradient(180deg, var(--invierno-fondo), transparent 75%);
+  }
+
+  .cerro {
+    fill: var(--cerro);
+  }
+
+  .volcan {
+    fill: var(--volcan);
+  }
+
+  .nieve {
+    fill: #fff;
+    opacity: 0.92;
+  }
+
+  .suelo {
+    fill: var(--suelo);
+  }
+
+  .arbol rect {
+    fill: var(--arbol);
+  }
+
+  .arbol path {
+    fill: none;
+    stroke: var(--arbol);
+    stroke-width: 3.5;
+    stroke-linecap: round;
+  }
+
+  .camino {
+    fill: none;
+    stroke: var(--camino);
+    stroke-width: 14;
+    stroke-linecap: round;
+  }
+
+  .camino-linea {
+    fill: none;
+    stroke: #f2e2b8;
+    stroke-width: 2;
+    stroke-dasharray: 10 10;
+    stroke-linecap: round;
+    animation: avanzar 1.6s linear infinite;
+  }
+
+  @keyframes avanzar {
+    to {
+      stroke-dashoffset: -20;
+    }
+  }
+
+  .tramo rect {
+    fill: var(--superficie);
+    stroke: var(--borde);
+  }
+
+  .tramo text {
+    fill: var(--texto);
+    font-family: var(--fuente-ui);
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  .parada circle {
+    fill: var(--bosque-claro);
+    stroke: #fff;
+    stroke-width: 3;
+  }
+
+  .parada text {
+    fill: #fff;
+    font-family: var(--fuente-ui);
+    font-size: 15px;
+    font-weight: 800;
+  }
+
+  .parada.destino circle {
+    fill: var(--madera);
+  }
+
+  .parada.destino text {
+    font-size: 18px;
+  }
+
+  .parada .pulso {
+    fill: var(--madera);
+    stroke: none;
+    opacity: 0.35;
+    transform-origin: center;
+    transform-box: fill-box;
+    animation: pulso 2s ease-out infinite;
+  }
+
+  @keyframes pulso {
+    from {
+      transform: scale(0.9);
+      opacity: 0.5;
+    }
+    to {
+      transform: scale(1.9);
+      opacity: 0;
+    }
+  }
+
+  /* Lista de paradas: 4 columnas alineadas con el dibujo */
+  .paradas {
+    list-style: none;
+    margin: 1.2rem 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .paradas li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.6rem;
+    align-items: start;
+    padding: 0.9rem;
+    border-radius: 14px;
+    background: var(--campo);
+  }
+
+  .paradas li.destino {
+    background: color-mix(in srgb, var(--madera) 14%, var(--superficie));
+    outline: 2px solid color-mix(in srgb, var(--madera) 45%, transparent);
+  }
+
+  .numero {
+    display: grid;
+    place-items: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--bosque-claro);
+    color: #fff;
+    font-family: var(--fuente-ui);
+    font-size: 0.8rem;
+    font-weight: 800;
+  }
+
+  .destino .numero {
+    background: var(--madera);
+  }
+
+  .paradas h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0.15rem 0 0.3rem;
+    font-size: 1rem;
+    color: var(--titulo);
+  }
+
+  .paradas h3 :global(.icono) {
+    color: var(--acento);
+    flex: none;
+  }
+
+  .paradas p {
+    margin: 0;
+    font-size: 0.88rem;
+    line-height: 1.45;
+    color: var(--texto-suave);
+  }
+
+  .siguiente {
+    display: none;
+  }
+
+  .aviso {
+    margin: 0.9rem 0 0;
+    font-size: 0.78rem;
+    color: var(--texto-suave);
+  }
+
+  /* Tablet y celular: los tiempos pasan del dibujo a la lista, que queda vertical */
+  @media (max-width: 860px) {
+    .tramo {
+      display: none;
+    }
+
+    .paradas {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+
+    .paradas li {
+      position: relative;
+      background: none;
+      padding: 0 0 1.1rem;
+      border-radius: 0;
+    }
+
+    .paradas li.destino {
+      outline: none;
+      background: none;
+    }
+
+    .paradas li.destino h3 {
+      color: var(--acento);
+    }
+
+    /* Línea vertical que une los números */
+    .paradas li:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      left: 12px;
+      top: 30px;
+      bottom: 2px;
+      border-left: 2px dashed var(--borde);
+    }
+
+    .siguiente {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      margin-top: 0.4rem !important;
+      font-family: var(--fuente-ui);
+      font-size: 0.78rem !important;
+      font-weight: 700;
+      color: var(--acento) !important;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .camino-linea,
+    .parada .pulso {
+      animation: none;
+    }
+  }
+</style>
