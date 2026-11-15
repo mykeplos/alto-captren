@@ -14,9 +14,11 @@ interface Props {
   description?: string;
   /** Ruta de esta página sin el idioma, ej. '' o 'cabanas/'. Sirve para el botón ES / EN. */
   path?: string;
+  /** Encabezado transparente sobre la foto (solo portada). */
+  encabezadoTransparente?: boolean;
 }
 
-const { lang, title, description, path = '' } = Astro.props;
+const { lang, title, description, path = '', encabezadoTransparente = false } = Astro.props;
 const t = useTranslations(lang);
 const other = otherLang(lang);
 const pageTitle = title ? `${title} · ${t('site.name')}` : `${t('site.name')} · ${t('site.tagline')}`;
@@ -53,7 +55,7 @@ const waHola = enlaceWhatsApp(t('wa.hola'));
       document.documentElement.classList.add('js');
     </script>
   </head>
-  <body>
+  <body class:list={[{ 'encabezado-transparente': encabezadoTransparente }]}>
     <header class="site-header">
       <div class="container header-inner">
         <a class="brand" href={home}>
@@ -114,16 +116,47 @@ const waHola = enlaceWhatsApp(t('wa.hola'));
     </main>
 
     <footer class="site-footer" id="contacto">
-      <div class="container">
-        <p class="footer-name">{t('site.name')}</p>
-        <p>{t('footer.location')}</p>
-        <p>
-          <a class="footer-wa" href={waHola} target="_blank" rel="noopener">
-            <IconoMarca name="whatsapp" size={18} />
-            {WHATSAPP_VISIBLE}
-          </a>
-        </p>
-        <p class="footer-small">© {year} {t('site.name')}. {t('footer.rights')}</p>
+      <div class="container footer-grid">
+        <div class="footer-marca">
+          <p class="footer-name">
+            <img src={url('favicon.svg')} alt="" width="36" height="36" />
+            {t('site.name')}
+          </p>
+          <p>{t('site.tagline')}.</p>
+          <a class="btn footer-cta" href={reservar}>{t('nav.book')}</a>
+        </div>
+        <nav class="footer-col" aria-label={t('footer.explora')}>
+          <p class="footer-titulo">{t('footer.explora')}</p>
+          <ul>
+            {
+              navItems
+                .filter((i) => i.href !== '#contacto')
+                .map((item) => (
+                  <li>
+                    <a href={item.href}>{item.label}</a>
+                  </li>
+                ))
+            }
+          </ul>
+        </nav>
+        <div class="footer-col">
+          <p class="footer-titulo">{t('nav.contact')}</p>
+          <ul>
+            <li>
+              <a class="footer-wa" href={waHola} target="_blank" rel="noopener">
+                <IconoMarca name="whatsapp" size={18} />
+                {WHATSAPP_VISIBLE}
+              </a>
+            </li>
+            <li class="footer-dir">
+              <Icon name="map-pin" size={18} />
+              <span>{t('footer.location')}</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="container footer-base">
+        <p>© {year} {t('site.name')}. {t('footer.rights')}</p>
       </div>
     </footer>
 
