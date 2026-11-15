@@ -254,3 +254,122 @@ svg {
   font-size: 0.85rem;
   opacity: 0.8;
 }
+
+/* ===== Efectos ===== */
+
+/* Transición suave entre páginas (navegadores modernos; los demás cambian de página normal) */
+@view-transition {
+  navigation: auto;
+}
+
+/* Bloques que aparecen al hacer scroll (solo si hay JavaScript) */
+/* Usa `translate` (no `transform`) para no chocar con el efecto de elevar tarjetas */
+.js [data-revelar] {
+  opacity: 0;
+  translate: 0 26px;
+  transition:
+    opacity 0.7s ease calc(var(--i, 0) * 90ms),
+    translate 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--i, 0) * 90ms),
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+.js [data-revelar].visible {
+  opacity: 1;
+  translate: none;
+}
+
+/* Encabezado con sombra al bajar */
+.site-header {
+  transition: box-shadow 0.3s ease;
+}
+
+.site-header.con-sombra {
+  box-shadow: 0 4px 18px rgb(0 0 0 / 0.18);
+}
+
+/* Botones */
+.btn {
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgb(0 0 0 / 0.18);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+/* Tarjetas que se elevan al pasar el mouse */
+.tarjeta,
+.actividad,
+.destacados li,
+.equipamiento li,
+.rutas > div,
+.preguntas details {
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease;
+}
+
+@media (hover: hover) {
+  .tarjeta:hover,
+  .actividad:hover,
+  .destacados li:hover,
+  .equipamiento li:hover,
+  .rutas > div:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 34px rgb(0 0 0 / 0.12);
+  }
+}
+
+/* Fotos dentro de tarjetas: leve acercamiento al pasar el mouse */
+.tarjeta,
+.actividad.con-foto {
+  overflow: hidden;
+}
+
+.tarjeta-foto,
+.actividad-foto {
+  transition: transform 0.6s ease;
+}
+
+@media (hover: hover) {
+  .tarjeta:hover .tarjeta-foto,
+  .actividad:hover .actividad-foto {
+    transform: scale(1.05);
+  }
+}
+
+/* Enlaces "ver más": la flecha se mueve */
+.ver-mas {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.ver-mas:hover {
+  transform: translateX(4px);
+}
+
+/* Respetar "reducir movimiento" del sistema */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+
+  .js [data-revelar] {
+    opacity: 1;
+    translate: none;
+  }
+}

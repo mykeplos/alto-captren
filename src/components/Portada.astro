@@ -135,9 +135,9 @@ const textos = {
   </div>
 </section>
 
-<section class="container seccion">
+<section data-revelar class="container seccion">
   <h2>{textos.destacadosTitulo}</h2>
-  <ul class="destacados">
+  <ul class="destacados" data-revelar-grupo>
     {
       textos.destacados.map(([icono, titulo, texto]) => (
         <li>
@@ -152,10 +152,10 @@ const textos = {
   </ul>
 </section>
 
-<section class="container seccion" id="cabanas">
+<section data-revelar class="container seccion" id="cabanas">
   <h2>{textos.cabanasTitulo}</h2>
   <p class="intro">{textos.cabanasIntro}</p>
-  <div class="tarjetas">
+  <div class="tarjetas" data-revelar-grupo>
     {
       cabanas.map((c) => (
         <article class="tarjeta">
@@ -189,10 +189,10 @@ const textos = {
   </div>
 </section>
 
-<section class="container seccion">
+<section data-revelar class="container seccion">
   <h2>{textos.alrededoresTitulo}</h2>
   <p class="intro">{textos.alrededoresIntro}</p>
-  <div class="lugares">
+  <div class="lugares" data-revelar-grupo>
     {
       textos.lugares.map(([clave, nombre, distancia]) => (
         <a class="lugar" href={url(`${lang}/actividades/#${clave}`)}>
@@ -219,7 +219,7 @@ const textos = {
   <p>{textos.temporadaTexto}</p>
 </section>
 
-<section class="container seccion" id="reservar">
+<section data-revelar class="container seccion" id="reservar">
   <h2>{textos.reservaTitulo}</h2>
   <ol class="pasos">
     {textos.pasos.map((paso) => <li>{paso}</li>)}
@@ -245,6 +245,49 @@ const textos = {
     object-fit: cover;
     /* Enfoca el volcán y deja fuera la mayor parte del camino */
     object-position: 52% 38%;
+    /* Acercamiento lento al cargar (efecto "Ken Burns") */
+    animation: acercar 14s ease-out both;
+  }
+
+  @keyframes acercar {
+    from {
+      transform: scale(1.12);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+
+  /* El texto de la portada entra de abajo hacia arriba, uno tras otro */
+  .hero-content > * {
+    animation: subir 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  .hero-content > :nth-child(2) {
+    animation-delay: 0.12s;
+  }
+
+  .hero-content > :nth-child(3) {
+    animation-delay: 0.24s;
+  }
+
+  .hero-content > :nth-child(4) {
+    animation-delay: 0.36s;
+  }
+
+  .hero-content > :nth-child(5) {
+    animation-delay: 0.48s;
+  }
+
+  @keyframes subir {
+    from {
+      opacity: 0;
+      transform: translateY(22px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   .hero-shade {

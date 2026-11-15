@@ -65,7 +65,7 @@ const reservar = url(`${lang}/#reservar`);
 
 {
   cabanas.map((c) => (
-    <section class="container cabana" id={c.id}>
+    <section data-revelar class="container cabana" id={c.id}>
       <div class="galeria">
         {(fotosCabana[c.id] ?? []).slice(0, 2).map((f, i) => (
           <Image
@@ -121,7 +121,7 @@ const reservar = url(`${lang}/#reservar`);
 
 <section class="container">
   <h2>{textos.equipamiento}</h2>
-  <ul class="equipamiento">
+  <ul class="equipamiento" data-revelar-grupo>
     {
       equipamiento.map((e) => (
         <li>
