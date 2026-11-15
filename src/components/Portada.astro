@@ -6,6 +6,8 @@ import type { Lang } from '../i18n/ui';
 import { url } from '../lib/url';
 import Icon from './Icon.astro';
 import CabanaDatos from './CabanaDatos.astro';
+import { Image } from 'astro:assets';
+import { fotosCabana, fotosLugares } from '../data/fotos';
 
 interface Props {
   lang: Lang;
@@ -40,6 +42,14 @@ const textos = {
     bano: 'baño',
     porNoche: 'por noche',
     verDetalle: 'Ver fotos, camas y precios',
+    alrededoresTitulo: 'Alrededores',
+    alrededoresIntro: 'Bosque nativo, cascadas y volcanes a minutos de tu cabaña.',
+    lugares: [
+      ['salto-captren', 'Salto Captren', 'A pocos minutos'],
+      ['conguillio', 'Parque Nacional Conguillío', '10 min'],
+      ['salto-princesa', 'Salto de la Princesa', 'Aprox. 45 min'],
+    ],
+    verActividades: 'Ver todo lo que puedes hacer',
     temporadaTitulo: 'Para todo el año',
     temporadaTexto:
       'Verano de lagos y senderos, o invierno con nieve. En temporada alta (diciembre a febrero, julio, agosto y fines de semana largos) la estadía mínima es de 2 noches.',
@@ -77,6 +87,14 @@ const textos = {
     bano: 'bathroom',
     porNoche: 'per night',
     verDetalle: 'See photos, beds and rates',
+    alrededoresTitulo: 'Around the cabins',
+    alrededoresIntro: 'Native forest, waterfalls and volcanoes just minutes from your cabin.',
+    lugares: [
+      ['salto-captren', 'Captren waterfall', 'A few minutes away'],
+      ['conguillio', 'Conguillío National Park', '10 min'],
+      ['salto-princesa', 'Salto de la Princesa', 'Approx. 45 min'],
+    ],
+    verActividades: 'See all things to do',
     temporadaTitulo: 'All year round',
     temporadaTexto:
       'Summer lakes and trails, or a snowy winter. In high season (December to February, July, August and long weekends) the minimum stay is 2 nights.',
@@ -141,9 +159,15 @@ const textos = {
     {
       cabanas.map((c) => (
         <article class="tarjeta">
-          <div class="tarjeta-foto" aria-hidden="true">
-            <span>{c.nombre[lang]}</span>
-          </div>
+          {fotosCabana[c.id]?.[0] && (
+            <Image
+              src={fotosCabana[c.id][0].src}
+              alt={fotosCabana[c.id][0].alt[lang]}
+              widths={[400, 640, 800]}
+              sizes="(min-width: 700px) 520px, 100vw"
+              class="tarjeta-foto"
+            />
+          )}
           <div class="tarjeta-cuerpo">
             <h3>{c.nombre[lang]}</h3>
             <CabanaDatos cabana={c} lang={lang} />
@@ -163,6 +187,31 @@ const textos = {
       ))
     }
   </div>
+</section>
+
+<section class="container seccion">
+  <h2>{textos.alrededoresTitulo}</h2>
+  <p class="intro">{textos.alrededoresIntro}</p>
+  <div class="lugares">
+    {
+      textos.lugares.map(([clave, nombre, distancia]) => (
+        <a class="lugar" href={url(`${lang}/actividades/#${clave}`)}>
+          <Image
+            src={fotosLugares[clave].src}
+            alt={fotosLugares[clave].alt[lang]}
+            widths={[400, 720]}
+            sizes="(min-width: 700px) 340px, 100vw"
+            class="lugar-foto"
+          />
+          <span class="lugar-texto">
+            <strong>{nombre}</strong>
+            <span>{distancia}</span>
+          </span>
+        </a>
+      ))
+    }
+  </div>
+  <p><a class="ver-mas" href={url(`${lang}/actividades/`)}>{textos.verActividades} →</a></p>
 </section>
 
 <section class="container seccion temporada">
@@ -335,14 +384,66 @@ const textos = {
     overflow: hidden;
   }
 
-  .tarjeta-foto {
+  .tarjeta :global(.tarjeta-foto) {
+    display: block;
+    width: 100%;
     aspect-ratio: 16 / 10;
+    height: auto;
+    object-fit: cover;
+  }
+
+  .lugares {
     display: grid;
-    place-items: center;
-    background: linear-gradient(135deg, var(--bosque-claro), var(--madera));
-    color: rgb(255 255 255 / 0.85);
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+    margin-top: 1.2rem;
+  }
+
+  .lugar {
+    position: relative;
+    display: block;
+    aspect-ratio: 4 / 5;
+    border-radius: var(--radio);
+    overflow: hidden;
+    box-shadow: var(--sombra);
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .lugar :global(.lugar-foto) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+
+  .lugar:hover :global(.lugar-foto) {
+    transform: scale(1.04);
+  }
+
+  .lugar-texto {
+    position: absolute;
+    inset: auto 0 0 0;
+    display: flex;
+    flex-direction: column;
+    padding: 2.5rem 1rem 1rem;
+    background: linear-gradient(to top, rgb(0 0 0 / 0.7), transparent);
+  }
+
+  .lugar-texto strong {
     font-family: var(--fuente-titulos);
-    font-size: 1.6rem;
+    font-size: 1.3rem;
+  }
+
+  .lugar-texto span {
+    font-size: 0.9rem;
+    opacity: 0.9;
+  }
+
+  @media (max-width: 700px) {
+    .lugar {
+      aspect-ratio: 16 / 11;
+    }
   }
 
   .tarjeta-cuerpo {

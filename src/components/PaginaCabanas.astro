@@ -4,6 +4,8 @@ import type { Lang } from '../i18n/ui';
 import { url } from '../lib/url';
 import Icon from './Icon.astro';
 import CabanaDatos from './CabanaDatos.astro';
+import { Image } from 'astro:assets';
+import { fotosCabana } from '../data/fotos';
 
 interface Props {
   lang: Lang;
@@ -26,7 +28,7 @@ const textos = {
     temporada: 'Temporada',
     reservar: 'Reservar',
     foto: 'Foto',
-    fotosPronto: 'Fotos reales muy pronto',
+    fotosPronto: 'Fotos del interior muy pronto',
     notaPrecio:
       'Precios en pesos chilenos. Se reserva con un abono del 50% por transferencia; el resto se paga al llegar.',
   },
@@ -44,7 +46,7 @@ const textos = {
     temporada: 'Season',
     reservar: 'Book now',
     foto: 'Photo',
-    fotosPronto: 'Real photos coming soon',
+    fotosPronto: 'Interior photos coming soon',
     notaPrecio:
       'Prices in Chilean pesos (CLP). Bookings are secured with a 50% deposit by bank transfer; the balance is paid on arrival.',
   },
@@ -64,14 +66,19 @@ const reservar = url(`${lang}/#reservar`);
 {
   cabanas.map((c) => (
     <section class="container cabana" id={c.id}>
-      <div class="galeria" aria-label={textos.fotosPronto}>
-        {[1, 2, 3].map((n) => (
-          <div class={`foto foto-${n}`}>
-            <span>
-              {c.nombre[lang]} · {textos.foto} {n}
-            </span>
-          </div>
+      <div class="galeria">
+        {(fotosCabana[c.id] ?? []).slice(0, 2).map((f, i) => (
+          <Image
+            src={f.src}
+            alt={f.alt[lang]}
+            widths={i === 0 ? [480, 800, 1280] : [400, 640]}
+            sizes={i === 0 ? '(min-width: 860px) 420px, 66vw' : '(min-width: 860px) 210px, 33vw'}
+            class={`foto-img foto-${i + 1}`}
+          />
         ))}
+        <div class="foto foto-3">
+          <span>{textos.fotosPronto}</span>
+        </div>
       </div>
       <div class="detalle">
         <h2>{c.nombre[lang]}</h2>
@@ -189,13 +196,17 @@ const reservar = url(`${lang}/#reservar`);
     background: linear-gradient(135deg, var(--bosque-claro), var(--madera));
   }
 
-  .foto-1 {
-    grid-row: span 2;
-    font-size: 1.1rem;
+  .galeria :global(.foto-img) {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    object-fit: cover;
+    border-radius: 10px;
+    display: block;
   }
 
-  .foto-2 {
-    background: linear-gradient(135deg, #4c6f5b, #7d8b95);
+  .galeria :global(.foto-1) {
+    grid-row: span 2;
   }
 
   .foto-3 {
