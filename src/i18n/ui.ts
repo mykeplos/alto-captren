@@ -24,6 +24,12 @@ export const ui = {
     'wa.flotante': 'Escríbenos por WhatsApp',
     'footer.explora': 'Explora',
     'footer.rights': 'Todos los derechos reservados.',
+    'menu.cabins': 'Dos cabañas para 4 y 6 personas, con estufa a leña y vista al volcán.',
+    'menu.location': 'Ruta R-925-S, Km 19. Cómo llegar y a qué distancia está todo.',
+    'menu.activities': 'Saltos de agua, lagunas y el volcán Llaima a minutos.',
+    'menu.faq': 'Horarios, mascotas, pagos y temporadas.',
+    'menu.book': 'Revisa fechas libres, ve el precio y reserva por WhatsApp.',
+    'menu.ver': 'Ver más',
   },
   en: {
     'site.name': 'Alto Captren Cabins',
@@ -45,6 +51,12 @@ export const ui = {
     'wa.flotante': 'Message us on WhatsApp',
     'footer.explora': 'Explore',
     'footer.rights': 'All rights reserved.',
+    'menu.cabins': 'Two cabins for 4 and 6 guests, with wood stove and volcano views.',
+    'menu.location': 'Route R-925-S, Km 19. How to get here and how far everything is.',
+    'menu.activities': 'Waterfalls, lagoons and Llaima volcano just minutes away.',
+    'menu.faq': 'Check-in times, pets, payments and seasons.',
+    'menu.book': 'Check open dates, see the price and book via WhatsApp.',
+    'menu.ver': 'See more',
   },
 } as const;
 
