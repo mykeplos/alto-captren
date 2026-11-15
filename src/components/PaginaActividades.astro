@@ -1,6 +1,9 @@
 ---
 import type { Lang } from '../i18n/ui';
+import { Image } from 'astro:assets';
 import Icon from './Icon.astro';
+import { fotosLugares } from '../data/fotos';
+import { url } from '../lib/url';
 
 interface Props {
   lang: Lang;
@@ -16,6 +19,10 @@ interface Actividad {
   distancia: string;
   texto: string;
   temporada: Temporada;
+  /** Clave de foto en src/data/fotos.ts */
+  foto?: string;
+  /** Video en /public/video (se muestra bajo la foto) */
+  video?: string;
 }
 
 const textos = {
@@ -24,6 +31,7 @@ const textos = {
     intro:
       'Desde las cabañas tienes a pocos minutos araucarias milenarias, lagunas, volcanes, saltos de agua, termas y nieve.',
     temporadas: { todo: 'Todo el año', verano: 'Mejor en verano', invierno: 'Invierno' },
+    verVideo: 'Ver video',
     nota: 'Tiempos aproximados en auto desde las cabañas. Revisa horarios, tarifas y cierres del Parque Nacional Conguillío en el sitio de CONAF antes de ir.',
     actividades: [
       {
@@ -33,6 +41,26 @@ const textos = {
         texto:
           'Bosques de araucarias, el volcán Llaima, coladas de lava y lagos de agua turquesa. Uno de los parques más lindos de Chile.',
         temporada: 'todo',
+        foto: 'conguillio',
+      },
+      {
+        icono: 'droplets',
+        titulo: 'Salto Captren',
+        distancia: 'A pocos minutos',
+        texto:
+          'Una cascada ancha de agua turquesa en medio del bosque nativo, muy cerca de las cabañas. Con sol se forma un arcoíris.',
+        temporada: 'todo',
+        foto: 'salto-captren',
+      },
+      {
+        icono: 'waves',
+        titulo: 'Salto de la Princesa y Salto del Indio',
+        distancia: 'Aprox. 45 min (unos 40 km)',
+        texto:
+          'El Salto de la Princesa cae entre paredes de roca a una poza de piedras. Está junto a la ruta 181, camino a Malalcahuello, igual que el Salto del Indio.',
+        temporada: 'todo',
+        foto: 'salto-princesa',
+        video: 'video/salto-princesa.mp4',
       },
       {
         icono: 'footprints',
@@ -42,24 +70,10 @@ const textos = {
         temporada: 'verano',
       },
       {
-        icono: 'droplets',
-        titulo: 'Salto Captren',
-        distancia: 'A pocos minutos',
-        texto: 'Salto de agua muy cerca de las cabañas, ideal para una caminata corta.',
-        temporada: 'todo',
-      },
-      {
         icono: 'bath',
         titulo: 'Termas de Manzanar y Malalcahuello',
         distancia: 'Aprox. 45 min a 1 h',
         texto: 'Piscinas termales para relajarse, especialmente ricas en invierno.',
-        temporada: 'todo',
-      },
-      {
-        icono: 'waves',
-        titulo: 'Salto del Indio y Salto de la Princesa',
-        distancia: 'Aprox. 45 min',
-        texto: 'Dos saltos de agua junto a la ruta 181, camino a Malalcahuello.',
         temporada: 'todo',
       },
       {
@@ -97,6 +111,7 @@ const textos = {
     intro:
       'Just minutes from the cabins you will find ancient monkey puzzle trees, lakes, volcanoes, waterfalls, hot springs and snow.',
     temporadas: { todo: 'All year', verano: 'Best in summer', invierno: 'Winter' },
+    verVideo: 'Watch video',
     nota: 'Approximate driving times from the cabins. Check opening hours, fees and closures of Conguillío National Park on the CONAF website before you go.',
     actividades: [
       {
@@ -106,6 +121,26 @@ const textos = {
         texto:
           'Monkey puzzle tree forests, Llaima volcano, lava fields and turquoise lakes. One of the most beautiful parks in Chile.',
         temporada: 'todo',
+        foto: 'conguillio',
+      },
+      {
+        icono: 'droplets',
+        titulo: 'Captren waterfall',
+        distancia: 'A few minutes away',
+        texto:
+          'A wide turquoise waterfall in the middle of the native forest, very close to the cabins. On sunny days you will see a rainbow.',
+        temporada: 'todo',
+        foto: 'salto-captren',
+      },
+      {
+        icono: 'waves',
+        titulo: 'Salto de la Princesa and Salto del Indio',
+        distancia: 'Approx. 45 min (about 40 km)',
+        texto:
+          'Salto de la Princesa falls between rock walls into a stony pool. It is right off route 181 towards Malalcahuello, like Salto del Indio.',
+        temporada: 'todo',
+        foto: 'salto-princesa',
+        video: 'video/salto-princesa.mp4',
       },
       {
         icono: 'footprints',
@@ -115,24 +150,10 @@ const textos = {
         temporada: 'verano',
       },
       {
-        icono: 'droplets',
-        titulo: 'Captren waterfall',
-        distancia: 'A few minutes away',
-        texto: 'A waterfall very close to the cabins, great for a short walk.',
-        temporada: 'todo',
-      },
-      {
         icono: 'bath',
         titulo: 'Manzanar and Malalcahuello hot springs',
         distancia: 'Approx. 45 min to 1 h',
         texto: 'Thermal pools to relax, especially lovely in winter.',
-        temporada: 'todo',
-      },
-      {
-        icono: 'waves',
-        titulo: 'Salto del Indio and Salto de la Princesa',
-        distancia: 'Approx. 45 min',
-        texto: 'Two waterfalls along route 181, on the way to Malalcahuello.',
         temporada: 'todo',
       },
       {
@@ -174,12 +195,25 @@ const textos = {
 
   <ul class="actividades">
     {
-      textos.actividades.map((a) => (
-        <li class="actividad">
-          <span class="icono-caja">
-            <Icon name={a.icono} size={26} />
-          </span>
-          <div>
+      textos.actividades.map((a) => {
+        const foto = a.foto ? fotosLugares[a.foto] : undefined;
+        return (
+        <li class:list={['actividad', { 'con-foto': foto }]} id={a.foto}>
+          {foto && (
+            <Image
+              src={foto.src}
+              alt={foto.alt[lang]}
+              widths={[400, 720]}
+              sizes="(min-width: 700px) 360px, 100vw"
+              class="actividad-foto"
+            />
+          )}
+          {!foto && (
+            <span class="icono-caja">
+              <Icon name={a.icono} size={26} />
+            </span>
+          )}
+          <div class="actividad-cuerpo">
             <h2>{a.titulo}</h2>
             <p class="meta">
               <span class="distancia">
@@ -188,9 +222,23 @@ const textos = {
               <span class={`etiqueta ${a.temporada}`}>{textos.temporadas[a.temporada]}</span>
             </p>
             <p>{a.texto}</p>
+            {a.video && (
+              <video
+                class="actividad-video"
+                src={url(a.video)}
+                poster={url('video/salto-princesa-poster.jpg')}
+                controls
+                muted
+                playsinline
+                preload="none"
+              >
+                <a href={url(a.video)}>{textos.verVideo}</a>
+              </video>
+            )}
           </div>
         </li>
-      ))
+        );
+      })
     }
   </ul>
 
@@ -227,6 +275,33 @@ const textos = {
     background: #fff;
     border-radius: var(--radio);
     box-shadow: var(--sombra);
+  }
+
+  /* Actividades con foto: la foto arriba, el texto abajo */
+  .actividad.con-foto {
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .con-foto .actividad-cuerpo {
+    padding: 1rem 1.2rem 1.2rem;
+  }
+
+  .actividad :global(.actividad-foto) {
+    width: 100%;
+    height: 230px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .actividad-video {
+    display: block;
+    width: 100%;
+    max-height: 420px;
+    margin-top: 0.9rem;
+    border-radius: 10px;
+    background: #000;
   }
 
   .icono-caja {
