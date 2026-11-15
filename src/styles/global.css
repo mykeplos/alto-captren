@@ -9,7 +9,7 @@
   --texto-suave: #55605a;
   --radio: 14px;
   --sombra: 0 6px 24px rgb(0 0 0 / 0.08);
-  --ancho: 1100px;
+  --ancho: 1200px;
   --fuente-texto: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
   --fuente-titulos: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
   color-scheme: light;
@@ -493,4 +493,119 @@ svg {
 /* Que el botón flotante no tape el final de la página */
 .site-footer {
   padding-bottom: 6rem;
+}
+
+/* ===== Diseño moderno ===== */
+
+/* Encabezado de vidrio */
+.site-header {
+  background: rgb(31 58 46 / 0.86);
+  backdrop-filter: saturate(1.4) blur(14px);
+  -webkit-backdrop-filter: saturate(1.4) blur(14px);
+  transition:
+    background-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.header-inner {
+  min-height: 68px;
+}
+
+/* Portada: encabezado transparente sobre la foto hasta que bajas */
+.encabezado-transparente .site-header {
+  position: fixed;
+  left: 0;
+  right: 0;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.encabezado-transparente .site-header.con-sombra,
+.encabezado-transparente .site-header:has(.nav.abierto) {
+  background: rgb(31 58 46 / 0.86);
+  backdrop-filter: saturate(1.4) blur(14px);
+  -webkit-backdrop-filter: saturate(1.4) blur(14px);
+}
+
+/* Pie de página en columnas */
+.site-footer {
+  margin-top: 0;
+  padding: 4rem 0 6rem;
+  background: #142a20;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1.2fr;
+  gap: 2.5rem;
+}
+
+@media (max-width: 760px) {
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+.footer-name {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.4rem !important;
+}
+
+.footer-cta {
+  margin-top: 1rem;
+}
+
+.footer-titulo {
+  margin: 0 0 0.8rem !important;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #e2b07a;
+}
+
+.footer-col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.footer-col a {
+  color: var(--crema);
+  text-decoration: none;
+}
+
+.footer-col a:hover {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.footer-dir {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+}
+
+.footer-dir .icono {
+  margin-top: 0.2rem;
+  flex: none;
+}
+
+.footer-base {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgb(255 255 255 / 0.1);
+  font-size: 0.85rem;
+  opacity: 0.7;
+}
+
+/* Las demás páginas: un poco más de aire arriba */
+main > section:first-child:not(.hero) {
+  padding-top: 3.5rem;
 }
