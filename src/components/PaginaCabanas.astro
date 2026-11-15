@@ -157,7 +157,7 @@ const reservar = (id: string) => url(`${lang}/reservar/?cabana=${id}`);
   .saltos a {
     padding: 0.35rem 0.9rem;
     border-radius: 999px;
-    background: var(--crema);
+    background: var(--chip);
     text-decoration: none;
     font-weight: 600;
   }
@@ -167,7 +167,7 @@ const reservar = (id: string) => url(`${lang}/reservar/?cabana=${id}`);
     grid-template-columns: 1fr;
     gap: 1.5rem;
     padding: 2.5rem 0;
-    border-bottom: 1px solid var(--crema);
+    border-bottom: 1px solid var(--borde);
   }
 
   @media (min-width: 860px) {
@@ -242,7 +242,7 @@ const reservar = (id: string) => url(`${lang}/reservar/?cabana=${id}`);
   .precios th,
   .precios td {
     padding: 0.6rem 0;
-    border-bottom: 1px solid var(--crema);
+    border-bottom: 1px solid var(--borde);
     text-align: left;
     vertical-align: top;
   }
@@ -256,7 +256,7 @@ const reservar = (id: string) => url(`${lang}/reservar/?cabana=${id}`);
   .precios td {
     text-align: right;
     font-weight: 700;
-    color: var(--madera);
+    color: var(--acento);
     font-size: 1.2rem;
     white-space: nowrap;
     padding-left: 1rem;
@@ -275,14 +275,14 @@ const reservar = (id: string) => url(`${lang}/reservar/?cabana=${id}`);
     align-items: center;
     gap: 0.6rem;
     padding: 0.7rem 0.9rem;
-    background: #fff;
+    background: var(--superficie);
     border-radius: 10px;
     box-shadow: var(--sombra);
   }
 
   .equipamiento :global(.icono) {
     flex: none;
-    color: var(--bosque-claro);
+    color: var(--enlace);
   }
 
   .nota {
