@@ -12,6 +12,7 @@
   --ancho: 1200px;
   --fuente-texto: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
   --fuente-titulos: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+  --fuente-ui: 'Montserrat Variable', 'Inter Variable', system-ui, sans-serif;
 
   /* Colores que cambian entre día y noche */
   --titulo: #1f3a2e;
@@ -648,7 +649,7 @@ svg {
 }
 
 /* Las demás páginas: un poco más de aire arriba */
-main > section:first-child:not(.hero) {
+main > section:first-child:not(.hero):not(.banner) {
   padding-top: 3.5rem;
 }
 
@@ -675,4 +676,37 @@ main > section:first-child:not(.hero) {
 :root[data-tema='noche'] .error {
   background: #3b1a14;
   color: #ffb4a3;
+}
+
+/* ===== Tipografía de etiquetas y botones (Montserrat, como el anillo del logo) ===== */
+.btn,
+.eyebrow,
+.nav-list a,
+.lang-switch,
+.footer-titulo,
+.kicker,
+.etiqueta,
+.badge-precio,
+.barra label,
+.campo > span,
+.datos-clave span,
+.wa-flotante,
+.ver-mas {
+  font-family: var(--fuente-ui);
+}
+
+.btn {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.nav-list a {
+  font-weight: 600;
+  font-size: 0.9rem;
+  letter-spacing: 0.02em;
+}
+
+.eyebrow {
+  font-weight: 800;
+  letter-spacing: 0.18em;
 }
