@@ -1,11 +1,8 @@
-/**
- * Datos de contacto del negocio.
- * TODO: confirmar el número con el dueño (sacado de la pegatina: +56 9 8570 3076).
- */
-export const WHATSAPP = '56985703076';
+/** Datos de contacto del negocio. */
+export const WHATSAPP = '56992430681';
 
 /** Número para mostrar en pantalla. */
-export const WHATSAPP_VISIBLE = '+56 9 8570 3076';
+export const WHATSAPP_VISIBLE = '+56 9 9243 0681';
 
 /** Enlace de WhatsApp con un mensaje ya escrito. */
 export function enlaceWhatsApp(mensaje = ''): string {
