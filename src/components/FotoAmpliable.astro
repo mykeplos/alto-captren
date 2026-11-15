@@ -1,0 +1,120 @@
+---
+// Foto que se abre a pantalla completa en el visor (ver Visor.astro).
+// Las fotos con el mismo `grupo` se recorren con las flechas dentro del visor.
+import { Image, getImage } from 'astro:assets';
+import type { Foto } from '../data/fotos';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  foto: Foto;
+  lang: Lang;
+  grupo: string;
+  widths: number[];
+  sizes: string;
+  /** Clase para el enlace que envuelve la foto (posición en la grilla). */
+  class?: string;
+  /** Clase para la imagen. */
+  claseImagen?: string;
+  loading?: 'lazy' | 'eager';
+}
+
+const { foto, lang, grupo, widths, sizes, class: clase, claseImagen, loading = 'lazy' } = Astro.props;
+const grande = await getImage({
+  src: foto.src,
+  width: Math.min(foto.src.width, 2000),
+  format: 'webp',
+  quality: 82,
+});
+const titulo = foto.titulo?.[lang] ?? '';
+const abrir = lang === 'es' ? 'Ampliar foto' : 'Enlarge photo';
+---
+
+<a
+  class:list={['foto-ampliable', clase]}
+  href={grande.src}
+  data-galeria={grupo}
+  data-titulo={titulo}
+  data-ancho={grande.attributes.width}
+  data-alto={grande.attributes.height}
+>
+  <Image src={foto.src} alt={foto.alt[lang]} widths={widths} sizes={sizes} class={claseImagen} loading={loading} />
+  <span class="lupa" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"></path>
+    </svg>
+  </span>
+  <span class="sr-only">{abrir}</span>
+</a>
+
+<style>
+  .foto-ampliable {
+    position: relative;
+    display: block;
+    overflow: hidden;
+    border-radius: 18px;
+    cursor: zoom-in;
+    color: inherit;
+  }
+
+  .foto-ampliable :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition:
+      transform 0.6s ease,
+      filter 0.4s ease;
+  }
+
+  .lupa {
+    position: absolute;
+    right: 0.7rem;
+    bottom: 0.7rem;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 0.45);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    color: #fff;
+    opacity: 0;
+    transform: scale(0.8);
+    transition:
+      opacity 0.25s ease,
+      transform 0.25s ease;
+  }
+
+  @media (hover: hover) {
+    .foto-ampliable:hover :global(img) {
+      transform: scale(1.04);
+      filter: brightness(1.05);
+    }
+
+    .foto-ampliable:hover .lupa {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* En pantallas táctiles la lupa se ve siempre, para que se entienda que se puede tocar */
+  @media (hover: none) {
+    .lupa {
+      opacity: 1;
+      transform: none;
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  .foto-ampliable:focus-visible {
+    outline: 3px solid #e7b37e;
+    outline-offset: 3px;
+  }
+
+  .foto-ampliable:focus-visible .lupa {
+    opacity: 1;
+    transform: none;
+  }
+</style>
