@@ -139,7 +139,7 @@ svg {
 }
 
 /* Celular: menú desplegable */
-@media (max-width: 720px) {
+@media (max-width: 900px) {
   .header-inner {
     flex-wrap: wrap;
     gap: 0.6rem;
