@@ -28,6 +28,11 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+        env:
+          # Calendario de disponibilidad (ver docs/calendario.md)
+          PUBLIC_GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          PUBLIC_CAL_CABANA_1: ${{ vars.CAL_CABANA_1 }}
+          PUBLIC_CAL_CABANA_2: ${{ vars.CAL_CABANA_2 }}
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
