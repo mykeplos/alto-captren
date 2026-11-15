@@ -8,7 +8,9 @@ interface Props {
 const { lang } = Astro.props;
 
 // TODO(#6): reemplazar por la ubicación exacta de las cabañas cuando el dueño comparta el pin de Google Maps.
-const consultaMapa = 'Captrén, Curacautín, Araucanía, Chile';
+// Por ahora: Laguna Captren, en la entrada norte del Parque Nacional Conguillío (las cabañas quedan a ~10 min).
+// Ojo: buscar solo "Captrén, Curacautín" pone el pin en un lugar equivocado, cerca del pueblo.
+const consultaMapa = '-38.6397222,-71.7019444';
 const mapa = `https://maps.google.com/maps?q=${encodeURIComponent(consultaMapa)}&z=11&output=embed`;
 const abrirMapa = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(consultaMapa)}`;
 
@@ -19,6 +21,7 @@ const textos = {
       'Estamos en el sector Captren, en el camino de Curacautín al Parque Nacional Conguillío (ruta R-925-S), Región de La Araucanía. La entrada Captren del parque queda a unos 10 minutos.',
     abrirMapa: 'Abrir en Google Maps',
     mapaTitulo: 'Mapa del sector Captren',
+    mapaNota: 'El mapa marca la Laguna Captren, en la entrada norte del parque. Las cabañas están a unos 10 minutos; te enviamos la ubicación exacta al reservar.',
     rutasTitulo: 'Cómo llegar',
     rutas: [
       ['Desde Curacautín', 'Unos 20 km por la ruta R-925-S hacia Conguillío (sector Captren). Parte del camino es de ripio. Aprox. 30 minutos.'],
@@ -42,6 +45,7 @@ const textos = {
       'We are in the Captren area, on the road from Curacautín to Conguillío National Park (route R-925-S), Araucanía Region, Chile. The park’s Captren entrance is about 10 minutes away.',
     abrirMapa: 'Open in Google Maps',
     mapaTitulo: 'Map of the Captren area',
+    mapaNota: 'The map shows Captren Lake, at the park’s northern entrance. The cabins are about 10 minutes away; we will send you the exact location when you book.',
     rutasTitulo: 'Getting here',
     rutas: [
       ['From Curacautín', 'About 20 km along route R-925-S towards Conguillío (Captren sector). Part of the road is gravel. Approx. 30 minutes.'],
@@ -74,6 +78,7 @@ const textos = {
       referrerpolicy="no-referrer-when-downgrade"
       allowfullscreen></iframe>
   </div>
+  <p class="nota">{textos.mapaNota}</p>
   <p><a class="btn" href={abrirMapa} target="_blank" rel="noopener">{textos.abrirMapa}</a></p>
 
   <h2>{textos.rutasTitulo}</h2>
