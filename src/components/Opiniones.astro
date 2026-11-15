@@ -1,0 +1,260 @@
+---
+// Opiniones de huéspedes. Si no hay opiniones en src/data/opiniones.ts, no se muestra nada.
+import { opiniones as todas, type Opinion } from '../data/opiniones';
+import { enlaceWhatsApp } from '../config';
+import type { Lang } from '../i18n/ui';
+import Icon from './Icon.astro';
+import IconoMarca from './IconoMarca.astro';
+
+interface Props {
+  lang: Lang;
+  /** Para probar el diseño en local sin tocar los datos reales. */
+  lista?: Opinion[];
+}
+
+const { lang, lista = todas } = Astro.props;
+
+const t =
+  lang === 'es'
+    ? {
+        eyebrow: 'Opiniones',
+        titulo: 'Lo que dicen nuestros huéspedes',
+        de: 'de 5',
+        opiniones: (n: number) => (n === 1 ? '1 opinión' : `${n} opiniones`),
+        cabanas: { 'cabana-1': 'Cabaña 1', 'cabana-2': 'Cabaña 2' },
+        ctaTexto: '¿Ya nos visitaste? Nos encantaría saber cómo lo pasaste.',
+        ctaBoton: 'Déjanos tu opinión',
+        waMensaje: 'Hola, me quedé en las Cabañas Alto Captren y quiero dejar mi opinión: ',
+        estrellas: (n: number) => `${n} de 5 estrellas`,
+      }
+    : {
+        eyebrow: 'Reviews',
+        titulo: 'What our guests say',
+        de: 'out of 5',
+        opiniones: (n: number) => (n === 1 ? '1 review' : `${n} reviews`),
+        cabanas: { 'cabana-1': 'Cabin 1', 'cabana-2': 'Cabin 2' },
+        ctaTexto: 'Have you stayed with us? We would love to hear how it went.',
+        ctaBoton: 'Leave a review',
+        waMensaje: 'Hi, I stayed at Alto Captren Cabins and would like to leave a review: ',
+        estrellas: (n: number) => `${n} out of 5 stars`,
+      };
+
+const promedio = lista.length ? lista.reduce((s, o) => s + o.estrellas, 0) / lista.length : 0;
+const fecha = (f: string) =>
+  new Date(`${f}-15T12:00:00`).toLocaleDateString(lang === 'es' ? 'es-CL' : 'en-US', {
+    month: 'long',
+    year: 'numeric',
+  });
+---
+
+{
+  lista.length > 0 && (
+    <section class="container seccion opiniones" id="opiniones">
+      <div class="cabeza" data-revelar>
+        <div>
+          <p class="eyebrow">{t.eyebrow}</p>
+          <h2>{t.titulo}</h2>
+        </div>
+        <div class="resumen" aria-label={t.estrellas(Math.round(promedio * 10) / 10)}>
+          <span class="promedio">{promedio.toFixed(1).replace('.', lang === 'es' ? ',' : '.')}</span>
+          <span>
+            <span class="estrellas" aria-hidden="true">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <Icon name="star" size={18} class={n <= Math.round(promedio) ? 'llena' : ''} />
+              ))}
+            </span>
+            <span class="cuantas">{t.opiniones(lista.length)}</span>
+          </span>
+        </div>
+      </div>
+
+      <ul class="tarjetas" data-revelar-grupo>
+        {lista.map((o) => (
+          <li class="tarjeta">
+            <Icon name="quote" size={34} class="comillas" />
+            <span class="estrellas" role="img" aria-label={t.estrellas(o.estrellas)}>
+              {[1, 2, 3, 4, 5].map((n) => (
+                <Icon name="star" size={16} class={n <= o.estrellas ? 'llena' : ''} />
+              ))}
+            </span>
+            <blockquote>{o.texto[lang]}</blockquote>
+            <footer>
+              <span class="avatar" aria-hidden="true">
+                {o.nombre.charAt(0)}
+              </span>
+              <span>
+                <strong>{o.nombre}</strong>
+                <span class="meta">
+                  {o.origen} · {fecha(o.fecha)}
+                  {o.cabana && ` · ${t.cabanas[o.cabana]}`}
+                </span>
+              </span>
+            </footer>
+          </li>
+        ))}
+      </ul>
+
+      <div class="cta" data-revelar>
+        <p>{t.ctaTexto}</p>
+        <a class="btn btn-outline" href={enlaceWhatsApp(t.waMensaje)} target="_blank" rel="noopener">
+          <IconoMarca name="whatsapp" size={18} />
+          {t.ctaBoton}
+        </a>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .cabeza {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+    margin-bottom: 1.8rem;
+  }
+
+  .cabeza h2 {
+    margin: 0.2rem 0 0;
+  }
+
+  .resumen {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+  }
+
+  .promedio {
+    font-family: var(--fuente-titulos);
+    font-size: 3rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--titulo);
+  }
+
+  .resumen > span:last-child {
+    display: grid;
+    gap: 0.2rem;
+  }
+
+  .cuantas {
+    font-size: 0.85rem;
+    color: var(--texto-suave);
+  }
+
+  .estrellas {
+    display: inline-flex;
+    gap: 2px;
+    color: var(--borde);
+  }
+
+  .estrellas :global(.llena) {
+    color: #e3a33b;
+    fill: #e3a33b;
+  }
+
+  .tarjetas {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .tarjeta {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+    padding: 1.5rem;
+    border-radius: 20px;
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    box-shadow: var(--sombra);
+    transition:
+      transform 0.25s ease,
+      box-shadow 0.25s ease;
+  }
+
+  @media (hover: hover) {
+    .tarjeta:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 36px rgb(0 0 0 / 0.12);
+    }
+  }
+
+  .tarjeta :global(.comillas) {
+    position: absolute;
+    top: 1.1rem;
+    right: 1.2rem;
+    color: var(--acento);
+    opacity: 0.18;
+  }
+
+  blockquote {
+    margin: 0;
+    flex: 1;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: var(--texto);
+  }
+
+  footer {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid var(--borde);
+  }
+
+  footer strong {
+    display: block;
+    color: var(--titulo);
+  }
+
+  .avatar {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--bosque-claro), var(--madera));
+    color: #fff;
+    font-family: var(--fuente-titulos);
+    font-weight: 700;
+  }
+
+  .meta {
+    font-size: 0.82rem;
+    color: var(--texto-suave);
+  }
+
+  .cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.8rem 1.2rem;
+    margin-top: 1.8rem;
+    text-align: center;
+  }
+
+  .cta p {
+    margin: 0;
+    color: var(--texto-suave);
+  }
+
+  .cta .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--titulo);
+  }
+
+  .cta .btn:hover {
+    background: var(--chip);
+  }
+</style>
