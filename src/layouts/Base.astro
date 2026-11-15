@@ -44,6 +44,10 @@ const current = Astro.url.pathname;
     <link rel="alternate" hreflang={lang} href={new URL(url(`${lang}/${path}`), Astro.site)} />
     <link rel="alternate" hreflang={other} href={new URL(url(`${other}/${path}`), Astro.site)} />
     <meta name="theme-color" content="#1f3a2e" />
+    <!-- Marca que hay JavaScript: solo así se esconden los bloques que aparecen al hacer scroll -->
+    <script is:inline>
+      document.documentElement.classList.add('js');
+    </script>
   </head>
   <body>
     <header class="site-header">
@@ -107,5 +111,40 @@ const current = Astro.url.pathname;
         <p class="footer-small">© {year} {t('site.name')}. {t('footer.rights')}</p>
       </div>
     </footer>
+    <script is:inline>
+      // Efectos: bloques que aparecen al hacer scroll y sombra del encabezado
+      (function () {
+        var grupos = document.querySelectorAll('[data-revelar-grupo]');
+        grupos.forEach(function (g) {
+          Array.prototype.forEach.call(g.children, function (hijo, i) {
+            hijo.setAttribute('data-revelar', '');
+            hijo.style.setProperty('--i', String(Math.min(i, 6)));
+          });
+        });
+        var bloques = document.querySelectorAll('[data-revelar]');
+        if (!('IntersectionObserver' in window)) {
+          bloques.forEach(function (b) { b.classList.add('visible'); });
+        } else {
+          var obs = new IntersectionObserver(
+            function (entradas) {
+              entradas.forEach(function (e) {
+                if (e.isIntersecting) {
+                  e.target.classList.add('visible');
+                  obs.unobserve(e.target);
+                }
+              });
+            },
+            { rootMargin: '0px 0px -8% 0px', threshold: 0.08 }
+          );
+          bloques.forEach(function (b) { obs.observe(b); });
+        }
+        var header = document.querySelector('.site-header');
+        function sombra() {
+          if (header) header.classList.toggle('con-sombra', window.scrollY > 8);
+        }
+        sombra();
+        window.addEventListener('scroll', sombra, { passive: true });
+      })();
+    </script>
   </body>
 </html>
