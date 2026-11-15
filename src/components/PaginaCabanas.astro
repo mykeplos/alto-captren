@@ -6,7 +6,7 @@ import type { Lang } from '../i18n/ui';
 import { url } from '../lib/url';
 import Icon from './Icon.astro';
 import CabanaDatos from './CabanaDatos.astro';
-import { Image } from 'astro:assets';
+import FotoAmpliable from './FotoAmpliable.astro';
 import { fotosCabana } from '../data/fotos';
 
 interface Props {
@@ -77,9 +77,10 @@ const reservar = (id: string) => url(`${lang}/reservar/?cabana=${id}`);
     <section data-revelar class="container cabana" id={c.id}>
       <div class="galeria">
         {(fotosCabana[c.id] ?? []).slice(0, 2).map((f, i) => (
-          <Image
-            src={f.src}
-            alt={f.alt[lang]}
+          <FotoAmpliable
+            foto={f}
+            lang={lang}
+            grupo={c.id}
             widths={i === 0 ? [480, 800, 1280] : [400, 640]}
             sizes={i === 0 ? '(min-width: 860px) 420px, 66vw' : '(min-width: 860px) 210px, 33vw'}
             class={`foto-img foto-${i + 1}`}
