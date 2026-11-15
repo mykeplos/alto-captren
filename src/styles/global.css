@@ -12,7 +12,49 @@
   --ancho: 1200px;
   --fuente-texto: 'Inter Variable', system-ui, -apple-system, 'Segoe UI', Roboto, Arial, sans-serif;
   --fuente-titulos: 'Fraunces Variable', Georgia, 'Times New Roman', serif;
+
+  /* Colores que cambian entre día y noche */
+  --titulo: #1f3a2e;
+  --enlace: #2f5643;
+  --acento: #8a5a34;
+  --superficie: #ffffff;
+  --chip: #e9e4d8;
+  --campo: #f7f5f0;
+  --borde: #e2dccd;
+  --vidrio: rgb(255 255 255 / 0.92);
+  --invierno-fondo: #e6eef2;
+  --invierno-texto: #23506a;
   color-scheme: light;
+}
+
+/* ===== Modo noche ===== */
+:root[data-tema='noche'] {
+  --bosque: #142a20;
+  --nieve: #0d1612;
+  --texto: #e6ebe7;
+  --texto-suave: #a7b4ac;
+  --titulo: #eef3ec;
+  --enlace: #9fd3ad;
+  --acento: #e7b37e;
+  --superficie: #16231d;
+  --chip: #213329;
+  --campo: #0f1a15;
+  --borde: #2b3d33;
+  --vidrio: rgb(22 35 29 / 0.9);
+  --invierno-fondo: #172a35;
+  --invierno-texto: #a9d4ec;
+  --sombra: 0 8px 28px rgb(0 0 0 / 0.45);
+  color-scheme: dark;
+}
+
+/* Cambio suave de colores al apretar el interruptor */
+html.cambiando-tema *,
+html.cambiando-tema *::before,
+html.cambiando-tema *::after {
+  transition:
+    background-color 0.45s ease,
+    color 0.45s ease,
+    border-color 0.45s ease !important;
 }
 
 *,
@@ -36,7 +78,7 @@ body {
   font-size: 1.0625rem;
   line-height: 1.65;
   color: var(--texto);
-  background: var(--nieve);
+  background: var(--campo);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -48,7 +90,7 @@ h3 {
   font-optical-sizing: auto;
   line-height: 1.15;
   letter-spacing: -0.01em;
-  color: var(--bosque);
+  color: var(--titulo);
 }
 
 .icono {
@@ -57,7 +99,7 @@ h3 {
 }
 
 a {
-  color: var(--bosque-claro);
+  color: var(--enlace);
 }
 
 img,
@@ -86,7 +128,7 @@ svg {
   top: 0;
   z-index: 10;
   background: rgb(31 58 46 / 0.96);
-  color: var(--nieve);
+  color: #f7f5f0;
 }
 
 .header-inner {
@@ -100,7 +142,7 @@ svg {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: var(--nieve);
+  color: #f7f5f0;
   text-decoration: none;
   font-family: var(--fuente-titulos);
   font-weight: 700;
@@ -142,7 +184,7 @@ svg {
   order: 4;
   background: none;
   border: 0;
-  color: var(--nieve);
+  color: #f7f5f0;
   font-size: 1.6rem;
   line-height: 1;
   padding: 0.3rem 0.4rem;
@@ -192,13 +234,13 @@ svg {
   border: 1px solid var(--crema);
   border-radius: 999px;
   padding: 0.15rem 0.7rem;
-  color: var(--nieve);
+  color: #f7f5f0;
   text-decoration: none;
   font-weight: 600;
   font-size: 0.85rem;
 }
 
-@media (max-width: 340px) {
+@media (max-width: 480px) {
   .brand span {
     display: none;
   }
@@ -383,7 +425,7 @@ svg {
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--madera);
+  color: var(--acento);
 }
 
 /* Botón "Reservar" del encabezado */
@@ -608,4 +650,29 @@ svg {
 /* Las demás páginas: un poco más de aire arriba */
 main > section:first-child:not(.hero) {
   padding-top: 3.5rem;
+}
+
+/* Logo e interruptor en el encabezado */
+.brand .logo {
+  filter: drop-shadow(0 2px 6px rgb(0 0 0 / 0.25));
+}
+
+.interruptor {
+  order: 3;
+}
+
+/* Modo noche: ajustes de detalles */
+:root[data-tema='noche'] .etiqueta.verano {
+  background: #3a2c14;
+  color: #f1cf97;
+}
+
+:root[data-tema='noche'] .etiqueta.invierno {
+  background: #18303f;
+  color: #a9d4ec;
+}
+
+:root[data-tema='noche'] .error {
+  background: #3b1a14;
+  color: #ffb4a3;
 }
