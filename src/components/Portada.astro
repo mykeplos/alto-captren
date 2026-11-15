@@ -11,6 +11,7 @@ import CabanaDatos from './CabanaDatos.astro';
 import Logo from './Logo.astro';
 import GaleriaPortada from './GaleriaPortada.astro';
 import Clima from './Clima.astro';
+import Opiniones from './Opiniones.astro';
 
 interface Props {
   lang: Lang;
@@ -255,6 +256,8 @@ const reservar = url(`${lang}/reservar/`);
     }
   </div>
 </section>
+
+<Opiniones lang={lang} />
 
 <section class="seccion-oscura">
   <div class="container">
