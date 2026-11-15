@@ -1,0 +1,127 @@
+---
+import FormReserva from './FormReserva.astro';
+import Icon from './Icon.astro';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+const t = {
+  es: {
+    eyebrow: 'Reservas',
+    titulo: 'Reserva tu cabaña',
+    intro:
+      'Completa el formulario y se abrirá WhatsApp con tu solicitud lista para enviar. Te respondemos con la disponibilidad y los datos para el abono.',
+    pasosTitulo: 'Cómo funciona',
+    pasos: [
+      ['calendar-days', 'Elige cabaña y fechas', 'Verás al tiro las noches y el precio estimado.'],
+      ['send', 'Envía por WhatsApp', 'Tu solicitud llega directo a nosotros, con todos los datos.'],
+      ['circle-check', 'Confirma con el abono', 'Te confirmamos disponibilidad y reservas con el 50% por transferencia.'],
+    ],
+  },
+  en: {
+    eyebrow: 'Bookings',
+    titulo: 'Book your cabin',
+    intro:
+      'Fill in the form and WhatsApp will open with your request ready to send. We will reply with availability and the deposit details.',
+    pasosTitulo: 'How it works',
+    pasos: [
+      ['calendar-days', 'Choose cabin and dates', 'You will see the nights and estimated price right away.'],
+      ['send', 'Send via WhatsApp', 'Your request reaches us directly, with all the details.'],
+      ['circle-check', 'Confirm with a deposit', 'We confirm availability and you book with a 50% bank transfer.'],
+    ],
+  },
+}[lang];
+---
+
+<section class="container pagina">
+  <p class="eyebrow">{t.eyebrow}</p>
+  <h1>{t.titulo}</h1>
+  <p class="intro">{t.intro}</p>
+
+  <FormReserva lang={lang} />
+
+  <h2>{t.pasosTitulo}</h2>
+  <ol class="pasos" data-revelar-grupo>
+    {
+      t.pasos.map(([icono, titulo, texto], i) => (
+        <li>
+          <span class="paso-icono">
+            <Icon name={icono} size={24} />
+          </span>
+          <span class="paso-num">{i + 1}</span>
+          <strong>{titulo}</strong>
+          <span>{texto}</span>
+        </li>
+      ))
+    }
+  </ol>
+</section>
+
+<style>
+  .pagina {
+    padding-top: 2.5rem;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 6vw, 3rem);
+    margin: 0 0 0.6rem;
+  }
+
+  h2 {
+    margin-top: 3rem;
+  }
+
+  .intro {
+    color: var(--texto-suave);
+    max-width: 44rem;
+    margin-bottom: 1.8rem;
+  }
+
+  .pasos {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+
+  .pasos li {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    padding: 1.3rem;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: var(--sombra);
+  }
+
+  .paso-icono {
+    display: grid;
+    place-items: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 0.4rem;
+    border-radius: 14px;
+    background: var(--crema);
+    color: var(--bosque);
+  }
+
+  .paso-num {
+    position: absolute;
+    top: 1rem;
+    right: 1.2rem;
+    font-family: var(--fuente-titulos);
+    font-size: 2.2rem;
+    color: var(--crema);
+    line-height: 1;
+  }
+
+  .pasos li > span:last-child {
+    color: var(--texto-suave);
+  }
+</style>
