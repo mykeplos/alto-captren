@@ -2,6 +2,8 @@
 import { cabanas, clp, equipamiento, temporadas } from '../data/cabanas';
 import type { Lang } from '../i18n/ui';
 import { url } from '../lib/url';
+import Icon from './Icon.astro';
+import CabanaDatos from './CabanaDatos.astro';
 
 interface Props {
   lang: Lang;
@@ -73,9 +75,7 @@ const reservar = url(`${lang}/#reservar`);
       </div>
       <div class="detalle">
         <h2>{c.nombre[lang]}</h2>
-        <p class="datos">
-          👥 {c.capacidad} {textos.personas} · 🛏️ {c.dormitorios} {textos.dormitorios} · 🚿 {c.banos} {textos.bano}
-        </p>
+        <CabanaDatos cabana={c} lang={lang} />
 
         <h3>{textos.camas}</h3>
         <ul class="piezas">
@@ -118,7 +118,7 @@ const reservar = url(`${lang}/#reservar`);
     {
       equipamiento.map((e) => (
         <li>
-          <span aria-hidden="true">{e.icono}</span> {e.texto[lang]}
+          <Icon name={e.icono} size={20} /> {e.texto[lang]}
         </li>
       ))
     }
@@ -260,10 +260,18 @@ const reservar = url(`${lang}/#reservar`);
   }
 
   .equipamiento li {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
     padding: 0.7rem 0.9rem;
     background: #fff;
     border-radius: 10px;
     box-shadow: var(--sombra);
+  }
+
+  .equipamiento :global(.icono) {
+    flex: none;
+    color: var(--bosque-claro);
   }
 
   .nota {

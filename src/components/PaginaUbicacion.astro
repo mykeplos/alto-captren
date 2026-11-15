@@ -1,5 +1,6 @@
 ---
 import type { Lang } from '../i18n/ui';
+import Icon from './Icon.astro';
 
 interface Props {
   lang: Lang;
@@ -30,7 +31,7 @@ const textos = {
       ['Desde Santiago', 'Ruta 5 Sur hasta Victoria, luego ruta 181 a Curacautín. Aprox. 8 horas.'],
       ['En avión o bus', 'El aeropuerto más cercano es el de Temuco. Hay buses de Temuco y Victoria a Curacautín.'],
     ],
-    inviernoTitulo: '❄️ Si vienes en invierno',
+    inviernoTitulo: 'Si vienes en invierno',
     invierno: [
       'Lleva cadenas: el camino puede tener nieve o hielo.',
       'Recomendamos vehículo 4×4 o con buena tracción.',
@@ -54,7 +55,7 @@ const textos = {
       ['From Santiago', 'Route 5 South to Victoria, then route 181 to Curacautín. Approx. 8 hours.'],
       ['By plane or bus', 'The nearest airport is Temuco. Buses run from Temuco and Victoria to Curacautín.'],
     ],
-    inviernoTitulo: '❄️ Coming in winter',
+    inviernoTitulo: 'Coming in winter',
     invierno: [
       'Bring snow chains: the road may have snow or ice.',
       'We recommend a 4×4 or a vehicle with good traction.',
@@ -95,13 +96,13 @@ const textos = {
   </dl>
 
   <div class="invierno">
-    <h2>{textos.inviernoTitulo}</h2>
+    <h2><Icon name="snowflake" size={24} /> {textos.inviernoTitulo}</h2>
     <ul>
       {textos.invierno.map((linea) => <li>{linea}</li>)}
     </ul>
   </div>
 
-  <p>🛒 {textos.compras}</p>
+  <p class="con-icono"><Icon name="shopping-cart" size={20} /> {textos.compras}</p>
   <p class="nota">{textos.nota}</p>
 </section>
 
@@ -174,8 +175,24 @@ const textos = {
   }
 
   .invierno h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     margin-top: 1rem;
     font-size: 1.4rem;
+    color: #23506a;
+  }
+
+  .con-icono {
+    display: flex;
+    gap: 0.5rem;
+    align-items: flex-start;
+  }
+
+  .con-icono :global(.icono) {
+    flex: none;
+    margin-top: 0.2rem;
+    color: var(--madera);
   }
 
   .nota {

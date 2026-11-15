@@ -46,18 +46,18 @@ export const cabanas: Cabana[] = [
 
 /** Equipamiento que tienen las dos cabañas. */
 export const equipamiento: { icono: string; texto: Texto }[] = [
-  { icono: '🍳', texto: { es: 'Cocina equipada', en: 'Fully equipped kitchen' } },
-  { icono: '🧊', texto: { es: 'Refrigerador', en: 'Fridge' } },
-  { icono: '♨️', texto: { es: 'Horno', en: 'Oven' } },
-  { icono: '🔥', texto: { es: 'Estufa a leña', en: 'Wood-burning stove' } },
-  { icono: '🚿', texto: { es: 'Agua caliente', en: 'Hot water' } },
-  { icono: '📶', texto: { es: 'Wifi', en: 'Wifi' } },
-  { icono: '🍖', texto: { es: 'Parrilla', en: 'Barbecue grill' } },
-  { icono: '🪵', texto: { es: 'Terraza', en: 'Deck' } },
-  { icono: '🚗', texto: { es: 'Estacionamiento', en: 'Parking' } },
-  { icono: '🛏️', texto: { es: 'Ropa de cama', en: 'Bed linen' } },
-  { icono: '🐾', texto: { es: 'Se aceptan mascotas', en: 'Pet friendly' } },
-  { icono: '🌋', texto: { es: 'Vista al volcán', en: 'Volcano views' } },
+  { icono: 'chef-hat', texto: { es: 'Cocina equipada', en: 'Fully equipped kitchen' } },
+  { icono: 'refrigerator', texto: { es: 'Refrigerador', en: 'Fridge' } },
+  { icono: 'microwave', texto: { es: 'Horno', en: 'Oven' } },
+  { icono: 'flame', texto: { es: 'Estufa a leña', en: 'Wood-burning stove' } },
+  { icono: 'shower-head', texto: { es: 'Agua caliente', en: 'Hot water' } },
+  { icono: 'wifi', texto: { es: 'Wifi', en: 'Wifi' } },
+  { icono: 'beef', texto: { es: 'Parrilla', en: 'Barbecue grill' } },
+  { icono: 'armchair', texto: { es: 'Terraza', en: 'Deck' } },
+  { icono: 'car', texto: { es: 'Estacionamiento', en: 'Parking' } },
+  { icono: 'bed-double', texto: { es: 'Ropa de cama', en: 'Bed linen' } },
+  { icono: 'paw-print', texto: { es: 'Se aceptan mascotas', en: 'Pet friendly' } },
+  { icono: 'mountain-snow', texto: { es: 'Vista al volcán', en: 'Volcano views' } },
 ];
 
 /** Temporadas de precio. */
