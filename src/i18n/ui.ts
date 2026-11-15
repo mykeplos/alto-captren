@@ -22,6 +22,7 @@ export const ui = {
     'footer.contact': 'Datos de contacto muy pronto.',
     'wa.hola': 'Hola, tengo una consulta sobre las Cabañas Alto Captren.',
     'wa.flotante': 'Escríbenos por WhatsApp',
+    'footer.explora': 'Explora',
     'footer.rights': 'Todos los derechos reservados.',
   },
   en: {
@@ -42,6 +43,7 @@ export const ui = {
     'footer.contact': 'Contact details coming soon.',
     'wa.hola': 'Hi, I have a question about Alto Captren Cabins.',
     'wa.flotante': 'Message us on WhatsApp',
+    'footer.explora': 'Explore',
     'footer.rights': 'All rights reserved.',
   },
 } as const;

@@ -1,13 +1,13 @@
 ---
-import { Picture } from 'astro:assets';
+import { Picture, Image } from 'astro:assets';
 import fotoPortada from '../assets/portada-llaima.jpg';
+import fotoInvierno from '../assets/cabana-invierno.jpg';
 import { cabanas, clp, precioDesde } from '../data/cabanas';
+import { fotosCabana, fotosLugares } from '../data/fotos';
 import type { Lang } from '../i18n/ui';
 import { url } from '../lib/url';
 import Icon from './Icon.astro';
 import CabanaDatos from './CabanaDatos.astro';
-import { Image } from 'astro:assets';
-import { fotosCabana, fotosLugares } from '../data/fotos';
 
 interface Props {
   lang: Lang;
@@ -19,13 +19,29 @@ const textos = {
   es: {
     kicker: 'Captren · Curacautín · La Araucanía',
     fotoAlt: 'Volcán Llaima visto desde el camino a Captren, rodeado de bosque',
-    titulo: 'Cabañas Alto Captren',
-    subtitulo: 'Descansa con vista al volcán, a 10 minutos del Parque Nacional Conguillío.',
+    titulo: 'Tu refugio frente al volcán',
+    subtitulo: 'Dos cabañas en Captren, a 10 minutos del Parque Nacional Conguillío. Bosque, cascadas, nieve y silencio.',
     desde: 'Desde',
     noche: 'noche',
     reservar: 'Reservar',
     verCabanas: 'Ver cabañas',
-    destacadosTitulo: 'Lo que vas a encontrar',
+    barra: {
+      cabana: 'Cabaña',
+      llegada: 'Llegada',
+      salida: 'Salida',
+      personas: 'Personas',
+      boton: 'Ver precio',
+    },
+    datos: [
+      ['2', 'cabañas completas'],
+      ['10 min', 'del Parque Conguillío'],
+      ['Km 19', 'Ruta R-925-S'],
+      ['Pet friendly', 'tu mascota es bienvenida'],
+    ],
+    destacadosEyebrow: 'La experiencia',
+    destacadosTitulo: 'Todo lo que necesitas para desconectarte',
+    destacadosTexto:
+      'Cabañas de madera cálidas, equipadas para que solo te preocupes de descansar y salir a explorar.',
     destacados: [
       ['mountain-snow', 'Vista al volcán', 'Despierta frente a la cordillera.'],
       ['trees', 'Conguillío a 10 min', 'Araucarias, lagunas y senderos.'],
@@ -34,43 +50,53 @@ const textos = {
       ['wifi', 'Wifi', 'Para conectarte cuando quieras.'],
       ['paw-print', 'Se aceptan mascotas', 'Tu perro también está de vacaciones.'],
     ],
+    cabanasEyebrow: 'Alojamiento',
     cabanasTitulo: 'Nuestras cabañas',
     cabanasIntro:
-      'Dos cabañas completas con cocina equipada, refrigerador, horno, agua caliente, parrilla, terraza, estacionamiento y ropa de cama.',
-    personas: 'personas',
-    dormitorios: 'dormitorios',
-    bano: 'baño',
-    porNoche: 'por noche',
+      'Cocina equipada, refrigerador, horno, agua caliente, parrilla, terraza, estacionamiento y ropa de cama.',
+    porNoche: '/ noche',
     verDetalle: 'Ver fotos, camas y precios',
-    alrededoresTitulo: 'Alrededores',
-    alrededoresIntro: 'Bosque nativo, cascadas y volcanes a minutos de tu cabaña.',
+    alrededoresEyebrow: 'Alrededores',
+    alrededoresTitulo: 'Naturaleza a minutos de tu cabaña',
+    alrededoresIntro: 'Bosque nativo, cascadas turquesa y volcanes nevados.',
     lugares: [
       ['salto-captren', 'Salto Captren', 'A pocos minutos'],
       ['conguillio', 'Parque Nacional Conguillío', '10 min'],
       ['salto-princesa', 'Salto de la Princesa', 'Aprox. 45 min'],
     ],
     verActividades: 'Ver todo lo que puedes hacer',
-    temporadaTitulo: 'Para todo el año',
-    temporadaTexto:
-      'Verano de lagos y senderos, o invierno con nieve. En temporada alta (diciembre a febrero, julio, agosto y fines de semana largos) la estadía mínima es de 2 noches.',
-    reservaTitulo: 'Cómo reservar',
-    pasos: [
-      'Elige tu cabaña y tus fechas.',
-      'Escríbenos por WhatsApp y te confirmamos disponibilidad y precio.',
-      'Reserva con un abono del 50% por transferencia.',
-    ],
-    reservaPronto: 'Ir al formulario de reserva',
+    inviernoAlt: 'Cabaña con las luces encendidas al atardecer en invierno',
+    ctaEyebrow: 'Verano e invierno',
+    ctaTitulo: 'Para todo el año',
+    ctaTexto:
+      'Lagos y senderos en verano, nieve y estufa a leña en invierno. Reserva en minutos: eliges fechas, ves el precio y nos escribes por WhatsApp.',
+    ctaBoton: 'Reservar mi cabaña',
   },
   en: {
     kicker: 'Captren · Curacautín · Araucanía, Chile',
     fotoAlt: 'Llaima volcano seen from the road to Captren, surrounded by forest',
-    titulo: 'Alto Captren Cabins',
-    subtitulo: 'Relax with volcano views, 10 minutes from Conguillío National Park.',
+    titulo: 'Your retreat facing the volcano',
+    subtitulo: 'Two cabins in Captren, 10 minutes from Conguillío National Park. Forest, waterfalls, snow and silence.',
     desde: 'From',
     noche: 'night',
     reservar: 'Book now',
     verCabanas: 'See the cabins',
-    destacadosTitulo: 'What you will find',
+    barra: {
+      cabana: 'Cabin',
+      llegada: 'Check-in',
+      salida: 'Check-out',
+      personas: 'Guests',
+      boton: 'See price',
+    },
+    datos: [
+      ['2', 'private cabins'],
+      ['10 min', 'from Conguillío Park'],
+      ['Km 19', 'Route R-925-S'],
+      ['Pet friendly', 'your pet is welcome'],
+    ],
+    destacadosEyebrow: 'The experience',
+    destacadosTitulo: 'Everything you need to unplug',
+    destacadosTexto: 'Warm wooden cabins, equipped so you only have to rest and go exploring.',
     destacados: [
       ['mountain-snow', 'Volcano views', 'Wake up facing the Andes.'],
       ['trees', 'Conguillío, 10 min away', 'Monkey puzzle trees, lakes and trails.'],
@@ -79,34 +105,30 @@ const textos = {
       ['wifi', 'Wifi', 'Stay connected whenever you want.'],
       ['paw-print', 'Pet friendly', 'Your dog is on holiday too.'],
     ],
+    cabanasEyebrow: 'Stay',
     cabanasTitulo: 'Our cabins',
-    cabanasIntro:
-      'Two private cabins with a fully equipped kitchen, fridge, oven, hot water, barbecue grill, deck, parking and bed linen.',
-    personas: 'guests',
-    dormitorios: 'bedrooms',
-    bano: 'bathroom',
-    porNoche: 'per night',
+    cabanasIntro: 'Fully equipped kitchen, fridge, oven, hot water, barbecue grill, deck, parking and bed linen.',
+    porNoche: '/ night',
     verDetalle: 'See photos, beds and rates',
-    alrededoresTitulo: 'Around the cabins',
-    alrededoresIntro: 'Native forest, waterfalls and volcanoes just minutes from your cabin.',
+    alrededoresEyebrow: 'Surroundings',
+    alrededoresTitulo: 'Nature minutes from your cabin',
+    alrededoresIntro: 'Native forest, turquoise waterfalls and snow-capped volcanoes.',
     lugares: [
       ['salto-captren', 'Captren waterfall', 'A few minutes away'],
       ['conguillio', 'Conguillío National Park', '10 min'],
       ['salto-princesa', 'Salto de la Princesa', 'Approx. 45 min'],
     ],
     verActividades: 'See all things to do',
-    temporadaTitulo: 'All year round',
-    temporadaTexto:
-      'Summer lakes and trails, or a snowy winter. In high season (December to February, July, August and long weekends) the minimum stay is 2 nights.',
-    reservaTitulo: 'How to book',
-    pasos: [
-      'Choose your cabin and dates.',
-      'Message us on WhatsApp and we will confirm availability and price.',
-      'Secure your booking with a 50% deposit by bank transfer.',
-    ],
-    reservaPronto: 'Go to the booking form',
+    inviernoAlt: 'Cabin with lights on at dusk in winter',
+    ctaEyebrow: 'Summer and winter',
+    ctaTitulo: 'All year round',
+    ctaTexto:
+      'Lakes and trails in summer, snow and a wood stove in winter. Book in minutes: choose your dates, see the price and message us on WhatsApp.',
+    ctaBoton: 'Book my cabin',
   },
 }[lang];
+
+const reservar = url(`${lang}/reservar/`);
 ---
 
 <section class="hero">
@@ -122,29 +144,46 @@ const textos = {
   />
   <div class="hero-shade"></div>
   <div class="container hero-content">
-    <p class="kicker">{textos.kicker}</p>
+    <p class="kicker"><Icon name="map-pin" size={15} /> {textos.kicker}</p>
     <h1>{textos.titulo}</h1>
     <p class="subtitulo">{textos.subtitulo}</p>
-    <p class="desde">
-      {textos.desde} <strong>{clp(precioDesde)}</strong> / {textos.noche}
-    </p>
     <div class="acciones">
-      <a class="btn" href={url(`${lang}/reservar/`)}>{textos.reservar}</a>
-      <a class="btn btn-outline" href="#cabanas">{textos.verCabanas}</a>
+      <a class="btn" href={reservar}>{textos.reservar}</a>
+      <a class="btn btn-vidrio" href="#cabanas">{textos.verCabanas}</a>
+      <span class="precio-chip">{textos.desde} <strong>{clp(precioDesde)}</strong> / {textos.noche}</span>
     </div>
+
+    <!-- Barra de reserva: lleva a la página Reservar con los datos ya elegidos -->
+    <form class="barra" action={reservar} method="get">
+      <label>
+        <span>{textos.barra.cabana}</span>
+        <select name="cabana">
+          {cabanas.map((c) => <option value={c.id}>{c.nombre[lang]} · {c.capacidad}</option>)}
+        </select>
+      </label>
+      <label>
+        <span>{textos.barra.llegada}</span>
+        <input type="date" name="llegada" />
+      </label>
+      <label>
+        <span>{textos.barra.salida}</span>
+        <input type="date" name="salida" />
+      </label>
+      <label class="barra-personas">
+        <span>{textos.barra.personas}</span>
+        <input type="number" name="personas" min="1" max="6" value="2" inputmode="numeric" />
+      </label>
+      <button class="btn" type="submit"><Icon name="search" size={18} /> {textos.barra.boton}</button>
+    </form>
   </div>
 </section>
 
-<section data-revelar class="container seccion">
-  <h2>{textos.destacadosTitulo}</h2>
-  <ul class="destacados" data-revelar-grupo>
+<section class="franja">
+  <ul class="container datos-clave" data-revelar-grupo>
     {
-      textos.destacados.map(([icono, titulo, texto]) => (
+      textos.datos.map(([valor, texto]) => (
         <li>
-          <span class="icono-caja">
-            <Icon name={icono} size={24} />
-          </span>
-          <strong>{titulo}</strong>
+          <strong>{valor}</strong>
           <span>{texto}</span>
         </li>
       ))
@@ -152,85 +191,111 @@ const textos = {
   </ul>
 </section>
 
-<section data-revelar class="container seccion" id="cabanas">
-  <h2>{textos.cabanasTitulo}</h2>
-  <p class="intro">{textos.cabanasIntro}</p>
+<section class="container seccion experiencia">
+  <div class="experiencia-texto" data-revelar>
+    <p class="eyebrow">{textos.destacadosEyebrow}</p>
+    <h2>{textos.destacadosTitulo}</h2>
+    <p class="intro">{textos.destacadosTexto}</p>
+  </div>
+  <ul class="destacados" data-revelar-grupo>
+    {
+      textos.destacados.map(([icono, titulo, texto]) => (
+        <li>
+          <span class="icono-caja">
+            <Icon name={icono} size={22} />
+          </span>
+          <span>
+            <strong>{titulo}</strong>
+            <span>{texto}</span>
+          </span>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<section class="container seccion" id="cabanas">
+  <div data-revelar>
+    <p class="eyebrow">{textos.cabanasEyebrow}</p>
+    <h2>{textos.cabanasTitulo}</h2>
+    <p class="intro">{textos.cabanasIntro}</p>
+  </div>
   <div class="tarjetas" data-revelar-grupo>
     {
       cabanas.map((c) => (
-        <article class="tarjeta">
-          {fotosCabana[c.id]?.[0] && (
-            <Image
-              src={fotosCabana[c.id][0].src}
-              alt={fotosCabana[c.id][0].alt[lang]}
-              widths={[400, 640, 800]}
-              sizes="(min-width: 700px) 520px, 100vw"
-              class="tarjeta-foto"
-            />
-          )}
+        <a class="tarjeta" href={url(`${lang}/cabanas/#${c.id}`)}>
+          <div class="tarjeta-media">
+            {fotosCabana[c.id]?.[0] && (
+              <Image
+                src={fotosCabana[c.id][0].src}
+                alt={fotosCabana[c.id][0].alt[lang]}
+                widths={[400, 640, 800]}
+                sizes="(min-width: 700px) 520px, 100vw"
+                class="tarjeta-foto"
+              />
+            )}
+            <span class="badge-precio">
+              {textos.desde} <strong>{clp(c.precio.baja)}</strong> {textos.porNoche}
+            </span>
+          </div>
           <div class="tarjeta-cuerpo">
             <h3>{c.nombre[lang]}</h3>
             <CabanaDatos cabana={c} lang={lang} />
-            <ul class="camas">
-              {c.piezas.map((p) => (
-                <li>{p[lang]}</li>
-              ))}
-            </ul>
-            <p class="precio">
-              {textos.desde} <strong>{clp(c.precio.baja)}</strong> {textos.porNoche}
-            </p>
-            <a class="ver-mas" href={url(`${lang}/cabanas/#${c.id}`)}>
-              {textos.verDetalle} →
-            </a>
+            <p class="camas">{c.piezas.map((p) => p[lang]).join(' · ')}</p>
+            <span class="ver-mas">{textos.verDetalle} →</span>
           </div>
-        </article>
-      ))
-    }
-  </div>
-</section>
-
-<section data-revelar class="container seccion">
-  <h2>{textos.alrededoresTitulo}</h2>
-  <p class="intro">{textos.alrededoresIntro}</p>
-  <div class="lugares" data-revelar-grupo>
-    {
-      textos.lugares.map(([clave, nombre, distancia]) => (
-        <a class="lugar" href={url(`${lang}/actividades/#${clave}`)}>
-          <Image
-            src={fotosLugares[clave].src}
-            alt={fotosLugares[clave].alt[lang]}
-            widths={[400, 720]}
-            sizes="(min-width: 700px) 340px, 100vw"
-            class="lugar-foto"
-          />
-          <span class="lugar-texto">
-            <strong>{nombre}</strong>
-            <span>{distancia}</span>
-          </span>
         </a>
       ))
     }
   </div>
-  <p><a class="ver-mas" href={url(`${lang}/actividades/`)}>{textos.verActividades} →</a></p>
 </section>
 
-<section class="container seccion temporada">
-  <h2>{textos.temporadaTitulo}</h2>
-  <p>{textos.temporadaTexto}</p>
+<section class="seccion-oscura">
+  <div class="container">
+    <div data-revelar>
+      <p class="eyebrow">{textos.alrededoresEyebrow}</p>
+      <h2>{textos.alrededoresTitulo}</h2>
+      <p class="intro">{textos.alrededoresIntro}</p>
+    </div>
+    <div class="lugares" data-revelar-grupo>
+      {
+        textos.lugares.map(([clave, nombre, distancia]) => (
+          <a class="lugar" href={url(`${lang}/actividades/#${clave}`)}>
+            <Image
+              src={fotosLugares[clave].src}
+              alt={fotosLugares[clave].alt[lang]}
+              widths={[400, 720]}
+              sizes="(min-width: 700px) 340px, 100vw"
+              class="lugar-foto"
+            />
+            <span class="lugar-texto">
+              <span class="lugar-distancia"><Icon name="map-pin" size={14} /> {distancia}</span>
+              <strong>{nombre}</strong>
+            </span>
+          </a>
+        ))
+      }
+    </div>
+    <p><a class="ver-mas ver-mas-claro" href={url(`${lang}/actividades/`)}>{textos.verActividades} →</a></p>
+  </div>
 </section>
 
-<section data-revelar class="container seccion" id="reservar">
-  <h2>{textos.reservaTitulo}</h2>
-  <ol class="pasos">
-    {textos.pasos.map((paso) => <li>{paso}</li>)}
-  </ol>
-  <p><a class="btn" href={url(`${lang}/reservar/`)}>{textos.reservaPronto} →</a></p>
+<section class="cta">
+  <Image src={fotoInvierno} alt={textos.inviernoAlt} widths={[640, 1280]} sizes="100vw" class="cta-foto" />
+  <div class="cta-shade"></div>
+  <div class="container cta-contenido" data-revelar>
+    <p class="eyebrow">{textos.ctaEyebrow}</p>
+    <h2>{textos.ctaTitulo}</h2>
+    <p>{textos.ctaTexto}</p>
+    <a class="btn" href={reservar}>{textos.ctaBoton}</a>
+  </div>
 </section>
 
 <style>
+  /* ---------- Portada ---------- */
   .hero {
     position: relative;
-    min-height: min(88vh, 640px);
+    min-height: max(640px, 100svh);
     display: flex;
     align-items: flex-end;
     overflow: hidden;
@@ -243,9 +308,7 @@ const textos = {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    /* Enfoca el volcán y deja fuera la mayor parte del camino */
     object-position: 52% 38%;
-    /* Acercamiento lento al cargar (efecto "Ken Burns") */
     animation: acercar 14s ease-out both;
   }
 
@@ -258,25 +321,38 @@ const textos = {
     }
   }
 
-  /* El texto de la portada entra de abajo hacia arriba, uno tras otro */
+  .hero-shade {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to bottom, rgb(10 22 17 / 0.55) 0%, transparent 22%),
+      linear-gradient(to top, rgb(10 22 17 / 0.92) 0%, rgb(10 22 17 / 0.45) 42%, rgb(10 22 17 / 0.05) 70%),
+      linear-gradient(to right, rgb(10 22 17 / 0.4), transparent 60%);
+  }
+
+  .hero-content {
+    position: relative;
+    padding: 8rem 0 2.5rem;
+  }
+
   .hero-content > * {
     animation: subir 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
   }
 
   .hero-content > :nth-child(2) {
-    animation-delay: 0.12s;
+    animation-delay: 0.1s;
   }
 
   .hero-content > :nth-child(3) {
-    animation-delay: 0.24s;
+    animation-delay: 0.2s;
   }
 
   .hero-content > :nth-child(4) {
-    animation-delay: 0.36s;
+    animation-delay: 0.3s;
   }
 
   .hero-content > :nth-child(5) {
-    animation-delay: 0.48s;
+    animation-delay: 0.45s;
   }
 
   @keyframes subir {
@@ -290,20 +366,437 @@ const textos = {
     }
   }
 
-  .hero-shade {
+  .kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0.35rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    letter-spacing: 0.06em;
+    background: rgb(255 255 255 / 0.14);
+    border: 1px solid rgb(255 255 255 / 0.25);
+    backdrop-filter: blur(8px);
+  }
+
+  .hero h1 {
+    color: #fff;
+    font-size: clamp(2.5rem, 7vw, 5.2rem);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    max-width: 14ch;
+    margin: 1rem 0 1rem;
+  }
+
+  .subtitulo {
+    font-size: clamp(1.05rem, 2.4vw, 1.3rem);
+    max-width: 38rem;
+    margin: 0 0 1.6rem;
+    color: rgb(255 255 255 / 0.9);
+  }
+
+  .acciones {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .btn-vidrio {
+    background: rgb(255 255 255 / 0.14);
+    border: 1px solid rgb(255 255 255 / 0.35);
+    backdrop-filter: blur(8px);
+  }
+
+  .btn-vidrio:hover {
+    background: rgb(255 255 255 / 0.24);
+  }
+
+  .precio-chip {
+    margin-left: 0.4rem;
+    color: rgb(255 255 255 / 0.85);
+  }
+
+  .precio-chip strong {
+    color: #fff;
+    font-size: 1.25rem;
+  }
+
+  /* Barra de reserva de vidrio */
+  .barra {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr 1fr 0.7fr auto;
+    gap: 0.6rem;
+    align-items: end;
+    padding: 0.9rem;
+    border-radius: 22px;
+    background: rgb(255 255 255 / 0.92);
+    backdrop-filter: blur(14px);
+    box-shadow: 0 20px 50px rgb(0 0 0 / 0.3);
+    color: var(--texto);
+  }
+
+  .barra label {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--texto-suave);
+  }
+
+  .barra input,
+  .barra select {
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 500;
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--texto);
+    padding: 0.6rem 0.7rem;
+    border: 1.5px solid #e2dccd;
+    border-radius: 12px;
+    background: #fff;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .barra input:focus,
+  .barra select:focus {
+    outline: none;
+    border-color: var(--bosque-claro);
+    box-shadow: 0 0 0 4px rgb(47 86 67 / 0.15);
+  }
+
+  .barra .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    height: 46px;
+    font: inherit;
+    font-weight: 700;
+  }
+
+  /* ---------- Franja de datos clave ---------- */
+  .franja {
+    background: var(--bosque);
+    color: var(--crema);
+  }
+
+  .datos-clave {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1rem;
+    list-style: none;
+    margin: 0 auto;
+    padding: 1.8rem 0;
+  }
+
+  .datos-clave li {
+    display: flex;
+    flex-direction: column;
+    padding-left: 1rem;
+    border-left: 2px solid rgb(255 255 255 / 0.15);
+  }
+
+  .datos-clave strong {
+    font-family: var(--fuente-titulos);
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    color: #fff;
+    line-height: 1.1;
+  }
+
+  .datos-clave span {
+    font-size: 0.9rem;
+    opacity: 0.85;
+  }
+
+  /* ---------- Secciones ---------- */
+  .seccion {
+    padding-top: 5rem;
+  }
+
+  .seccion h2,
+  .seccion-oscura h2,
+  .cta h2 {
+    font-size: clamp(1.8rem, 4.5vw, 2.8rem);
+    margin: 0 0 0.8rem;
+    max-width: 20ch;
+  }
+
+  .intro {
+    color: var(--texto-suave);
+    max-width: 40rem;
+    font-size: 1.08rem;
+  }
+
+  /* La experiencia: texto a la izquierda, íconos a la derecha */
+  .experiencia {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  @media (min-width: 900px) {
+    .experiencia {
+      grid-template-columns: 0.9fr 1.1fr;
+      align-items: center;
+    }
+  }
+
+  .destacados {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 0.8rem;
+  }
+
+  .destacados li {
+    display: flex;
+    gap: 0.9rem;
+    align-items: flex-start;
+    padding: 1rem 1.1rem;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: var(--sombra);
+  }
+
+  .destacados li > span:last-child {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .destacados li > span:last-child span {
+    color: var(--texto-suave);
+    font-size: 0.92rem;
+  }
+
+  .icono-caja {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 14px;
+    background: var(--crema);
+    color: var(--bosque);
+  }
+
+  /* Tarjetas de cabañas */
+  .tarjetas {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .tarjeta {
+    display: block;
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: var(--sombra);
+    overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .tarjeta-media {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tarjeta :global(.tarjeta-foto) {
+    display: block;
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    height: auto;
+    object-fit: cover;
+  }
+
+  .badge-precio {
+    position: absolute;
+    left: 1rem;
+    bottom: 1rem;
+    padding: 0.45rem 0.9rem;
+    border-radius: 999px;
+    background: rgb(255 255 255 / 0.92);
+    backdrop-filter: blur(8px);
+    font-size: 0.9rem;
+    color: var(--texto-suave);
+  }
+
+  .badge-precio strong {
+    color: var(--madera);
+    font-size: 1.1rem;
+  }
+
+  .tarjeta-cuerpo {
+    padding: 1.3rem 1.4rem 1.5rem;
+  }
+
+  .tarjeta h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.6rem;
+  }
+
+  .camas {
+    margin: 0 0 1rem;
+    color: var(--texto-suave);
+    font-size: 0.95rem;
+  }
+
+  .ver-mas {
+    font-weight: 700;
+    color: var(--bosque-claro);
+  }
+
+  /* Sección oscura de alrededores */
+  .seccion-oscura {
+    margin-top: 5rem;
+    padding: 5rem 0 4rem;
+    background: var(--bosque);
+    color: var(--crema);
+  }
+
+  .seccion-oscura h2 {
+    color: #fff;
+  }
+
+  .seccion-oscura .intro {
+    color: rgb(233 228 216 / 0.8);
+  }
+
+  .seccion-oscura .eyebrow {
+    color: #e2b07a;
+  }
+
+  .lugares {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.2rem;
+    margin: 2rem 0 1.5rem;
+  }
+
+  .lugar {
+    position: relative;
+    display: block;
+    aspect-ratio: 3 / 4;
+    border-radius: 24px;
+    overflow: hidden;
+    color: #fff;
+    text-decoration: none;
+    box-shadow: 0 18px 40px rgb(0 0 0 / 0.3);
+  }
+
+  .lugar :global(.lugar-foto) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s ease;
+  }
+
+  .lugar:hover :global(.lugar-foto) {
+    transform: scale(1.06);
+  }
+
+  .lugar-texto {
+    position: absolute;
+    inset: auto 0 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 3rem 1.2rem 1.2rem;
+    background: linear-gradient(to top, rgb(0 0 0 / 0.75), transparent);
+  }
+
+  .lugar-texto strong {
+    font-family: var(--fuente-titulos);
+    font-size: 1.45rem;
+    line-height: 1.15;
+  }
+
+  .lugar-distancia {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: 0.85rem;
+    opacity: 0.9;
+  }
+
+  .ver-mas-claro {
+    color: #fff;
+  }
+
+  /* Llamado final con foto de invierno */
+  .cta {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 520px;
+    overflow: hidden;
+    color: #fff;
+  }
+
+  .cta :global(.cta-foto) {
     position: absolute;
     inset: 0;
-    background:
-      linear-gradient(to top, rgb(15 30 24 / 0.9) 0%, rgb(15 30 24 / 0.45) 40%, rgb(15 30 24 / 0.05) 70%),
-      linear-gradient(to right, rgb(15 30 24 / 0.45), transparent 60%);
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
   }
 
-  .hero-content {
+  .cta-shade {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to right, rgb(10 22 17 / 0.85), rgb(10 22 17 / 0.35));
+  }
+
+  .cta-contenido {
     position: relative;
-    padding: 6rem 0 3rem;
+    padding: 4rem 0;
   }
 
-  /* Celular: foto arriba (que se vea el volcán) y texto debajo sobre verde bosque */
+  .cta h2 {
+    color: #fff;
+  }
+
+  .cta p:not(.eyebrow) {
+    max-width: 34rem;
+    font-size: 1.1rem;
+    color: rgb(255 255 255 / 0.9);
+    margin-bottom: 1.6rem;
+  }
+
+  .cta .eyebrow {
+    color: #e2b07a;
+  }
+
+  /* ---------- Celular ---------- */
+  @media (max-width: 860px) {
+    .barra {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .barra label:first-child,
+    .barra .btn {
+      grid-column: 1 / -1;
+    }
+
+    .datos-clave {
+      grid-template-columns: repeat(2, 1fr);
+      row-gap: 1.4rem;
+    }
+  }
+
   @media (max-width: 700px) {
     .hero {
       display: block;
@@ -313,230 +806,41 @@ const textos = {
 
     .hero :global(.hero-foto) {
       position: relative;
-      height: 46vh;
-      min-height: 260px;
+      height: 52vh;
+      min-height: 300px;
       object-position: 52% 45%;
     }
 
     .hero-shade {
       bottom: auto;
-      height: 46vh;
-      min-height: 260px;
-      background: linear-gradient(to top, #0f1e18 0%, rgb(15 30 24 / 0) 35%);
+      height: 52vh;
+      min-height: 300px;
+      background:
+        linear-gradient(to bottom, rgb(10 22 17 / 0.6) 0%, transparent 25%),
+        linear-gradient(to top, #0f1e18 0%, rgb(15 30 24 / 0) 40%);
     }
 
     .hero-content {
-      padding: 0.5rem 0 2.5rem;
+      margin-top: -5rem;
+      padding: 0 0 2rem;
     }
-  }
 
-  .hero h1 {
-    color: #fff;
-    font-size: clamp(2.2rem, 7vw, 4rem);
-    margin: 0.2rem 0 0.6rem;
-  }
+    .precio-chip {
+      margin: 0.4rem 0 0;
+      width: 100%;
+    }
 
-  .kicker {
-    margin: 0;
-    font-size: 0.9rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    opacity: 0.9;
-  }
+    .seccion {
+      padding-top: 3.5rem;
+    }
 
-  .subtitulo {
-    font-size: clamp(1.05rem, 2.8vw, 1.3rem);
-    max-width: 36rem;
-    margin: 0 0 1rem;
-  }
+    .seccion-oscura {
+      margin-top: 3.5rem;
+      padding: 3.5rem 0 3rem;
+    }
 
-  .desde {
-    margin: 0 0 1.4rem;
-  }
-
-  .desde strong {
-    font-size: 1.4rem;
-  }
-
-  .acciones {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-  }
-
-  .seccion {
-    padding-top: 3.5rem;
-  }
-
-  .seccion h2 {
-    font-size: clamp(1.6rem, 4.5vw, 2.2rem);
-    margin: 0 0 1rem;
-  }
-
-  .intro {
-    color: var(--texto-suave);
-    max-width: 44rem;
-  }
-
-  .destacados {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-    gap: 1rem;
-  }
-
-  .destacados li {
-    display: flex;
-    flex-direction: column;
-    gap: 0.2rem;
-    padding: 1.1rem;
-    background: #fff;
-    border-radius: var(--radio);
-    box-shadow: var(--sombra);
-  }
-
-  .icono-caja {
-    display: grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    margin-bottom: 0.5rem;
-    border-radius: 12px;
-    background: var(--crema);
-    color: var(--bosque);
-  }
-
-  .destacados span:last-child {
-    color: var(--texto-suave);
-    font-size: 0.95rem;
-  }
-
-  .tarjetas {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1.5rem;
-  }
-
-  .tarjeta {
-    background: #fff;
-    border-radius: var(--radio);
-    box-shadow: var(--sombra);
-    overflow: hidden;
-  }
-
-  .tarjeta :global(.tarjeta-foto) {
-    display: block;
-    width: 100%;
-    aspect-ratio: 16 / 10;
-    height: auto;
-    object-fit: cover;
-  }
-
-  .lugares {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-    gap: 1rem;
-    margin-top: 1.2rem;
-  }
-
-  .lugar {
-    position: relative;
-    display: block;
-    aspect-ratio: 4 / 5;
-    border-radius: var(--radio);
-    overflow: hidden;
-    box-shadow: var(--sombra);
-    color: #fff;
-    text-decoration: none;
-  }
-
-  .lugar :global(.lugar-foto) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.4s ease;
-  }
-
-  .lugar:hover :global(.lugar-foto) {
-    transform: scale(1.04);
-  }
-
-  .lugar-texto {
-    position: absolute;
-    inset: auto 0 0 0;
-    display: flex;
-    flex-direction: column;
-    padding: 2.5rem 1rem 1rem;
-    background: linear-gradient(to top, rgb(0 0 0 / 0.7), transparent);
-  }
-
-  .lugar-texto strong {
-    font-family: var(--fuente-titulos);
-    font-size: 1.3rem;
-  }
-
-  .lugar-texto span {
-    font-size: 0.9rem;
-    opacity: 0.9;
-  }
-
-  @media (max-width: 700px) {
     .lugar {
-      aspect-ratio: 16 / 11;
+      aspect-ratio: 4 / 3;
     }
-  }
-
-  .tarjeta-cuerpo {
-    padding: 1.2rem 1.3rem 1.4rem;
-  }
-
-  .tarjeta h3 {
-    margin: 0 0 0.4rem;
-    font-size: 1.5rem;
-  }
-
-  .datos {
-    margin: 0 0 0.6rem;
-    color: var(--texto-suave);
-  }
-
-  .camas {
-    margin: 0 0 0.8rem;
-    padding-left: 1.2rem;
-  }
-
-  .precio {
-    margin: 0 0 0.6rem;
-  }
-
-  .ver-mas {
-    font-weight: 600;
-  }
-
-  .precio strong {
-    color: var(--madera);
-    font-size: 1.25rem;
-  }
-
-  .temporada {
-    max-width: 48rem;
-  }
-
-  .pasos {
-    padding-left: 1.4rem;
-  }
-
-  .pasos li {
-    margin-bottom: 0.5rem;
-  }
-
-  .aviso {
-    padding: 0.9rem 1.1rem;
-    background: var(--crema);
-    border-left: 4px solid var(--madera);
-    border-radius: 6px;
   }
 </style>
