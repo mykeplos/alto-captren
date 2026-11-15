@@ -1,5 +1,6 @@
 ---
-import HeroArt from './HeroArt.astro';
+import { Picture } from 'astro:assets';
+import fotoPortada from '../assets/portada-llaima.jpg';
 import { cabanas, clp, precioDesde } from '../data/cabanas';
 import type { Lang } from '../i18n/ui';
 import { url } from '../lib/url';
@@ -13,6 +14,7 @@ const { lang } = Astro.props;
 const textos = {
   es: {
     kicker: 'Captren · Curacautín · La Araucanía',
+    fotoAlt: 'Volcán Llaima visto desde el camino a Captren, rodeado de bosque',
     titulo: 'Cabañas Alto Captren',
     subtitulo: 'Descansa con vista al volcán, a 10 minutos del Parque Nacional Conguillío.',
     desde: 'Desde',
@@ -49,6 +51,7 @@ const textos = {
   },
   en: {
     kicker: 'Captren · Curacautín · Araucanía, Chile',
+    fotoAlt: 'Llaima volcano seen from the road to Captren, surrounded by forest',
     titulo: 'Alto Captren Cabins',
     subtitulo: 'Relax with volcano views, 10 minutes from Conguillío National Park.',
     desde: 'From',
@@ -87,7 +90,16 @@ const textos = {
 ---
 
 <section class="hero">
-  <HeroArt />
+  <Picture
+    src={fotoPortada}
+    alt={textos.fotoAlt}
+    class="hero-foto"
+    formats={['avif', 'webp']}
+    widths={[640, 960, 1280]}
+    sizes="100vw"
+    loading="eager"
+    fetchpriority="high"
+  />
   <div class="hero-shade"></div>
   <div class="container hero-content">
     <p class="kicker">{textos.kicker}</p>
@@ -176,15 +188,54 @@ const textos = {
     color: #fff;
   }
 
+  .hero :global(.hero-foto) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Enfoca el volcán y deja fuera la mayor parte del camino */
+    object-position: 52% 38%;
+  }
+
   .hero-shade {
     position: absolute;
     inset: 0;
-    background: linear-gradient(to top, rgb(20 38 30 / 0.85) 0%, rgb(20 38 30 / 0.35) 45%, transparent 75%);
+    background:
+      linear-gradient(to top, rgb(15 30 24 / 0.9) 0%, rgb(15 30 24 / 0.45) 40%, rgb(15 30 24 / 0.05) 70%),
+      linear-gradient(to right, rgb(15 30 24 / 0.45), transparent 60%);
   }
 
   .hero-content {
     position: relative;
     padding: 6rem 0 3rem;
+  }
+
+  /* Celular: foto arriba (que se vea el volcán) y texto debajo sobre verde bosque */
+  @media (max-width: 700px) {
+    .hero {
+      display: block;
+      min-height: auto;
+      background: #0f1e18;
+    }
+
+    .hero :global(.hero-foto) {
+      position: relative;
+      height: 46vh;
+      min-height: 260px;
+      object-position: 52% 45%;
+    }
+
+    .hero-shade {
+      bottom: auto;
+      height: 46vh;
+      min-height: 260px;
+      background: linear-gradient(to top, #0f1e18 0%, rgb(15 30 24 / 0) 35%);
+    }
+
+    .hero-content {
+      padding: 0.5rem 0 2.5rem;
+    }
   }
 
   .hero h1 {
