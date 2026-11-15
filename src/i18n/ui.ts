@@ -18,8 +18,10 @@ export const ui = {
     'nav.book': 'Reservar',
     'nav.menu': 'Menú',
     'lang.switch': 'English',
-    'footer.location': 'Captren, Curacautín · Región de La Araucanía, Chile',
+    'footer.location': 'Ruta R-925-S, Km 19 · Captren, Curacautín · Región de La Araucanía, Chile',
     'footer.contact': 'Datos de contacto muy pronto.',
+    'wa.hola': 'Hola, tengo una consulta sobre las Cabañas Alto Captren.',
+    'wa.flotante': 'Escríbenos por WhatsApp',
     'footer.rights': 'Todos los derechos reservados.',
   },
   en: {
@@ -36,8 +38,10 @@ export const ui = {
     'nav.book': 'Book now',
     'nav.menu': 'Menu',
     'lang.switch': 'Español',
-    'footer.location': 'Captren, Curacautín · Araucanía Region, Chile',
+    'footer.location': 'Route R-925-S, Km 19 · Captren, Curacautín · Araucanía Region, Chile',
     'footer.contact': 'Contact details coming soon.',
+    'wa.hola': 'Hi, I have a question about Alto Captren Cabins.',
+    'wa.flotante': 'Message us on WhatsApp',
     'footer.rights': 'All rights reserved.',
   },
 } as const;

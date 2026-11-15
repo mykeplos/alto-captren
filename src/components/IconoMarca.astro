@@ -1,0 +1,21 @@
+---
+// Íconos de marcas (WhatsApp, Instagram, Facebook) desde simple-icons.
+import { siWhatsapp, siInstagram, siFacebook } from 'simple-icons';
+
+interface Props {
+  name: 'whatsapp' | 'instagram' | 'facebook';
+  size?: number;
+}
+
+const { name, size = 24 } = Astro.props;
+const icono = { whatsapp: siWhatsapp, instagram: siInstagram, facebook: siFacebook }[name];
+---
+
+<svg
+  class="icono"
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="currentColor"
+  aria-hidden="true"
+  focusable="false"><path d={icono.path}></path></svg>

@@ -1,0 +1,430 @@
+---
+// Formulario de reserva: calcula noches y precio estimado, y envía todo por WhatsApp.
+import { cabanas } from '../data/cabanas';
+import { WHATSAPP } from '../config';
+import type { Lang } from '../i18n/ui';
+import Icon from './Icon.astro';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+
+const t = {
+  es: {
+    cabana: 'Cabaña',
+    hasta: 'hasta',
+    personasCorto: 'pers.',
+    llegada: 'Llegada',
+    salida: 'Salida',
+    personas: 'Personas',
+    mascota: '¿Vienes con mascota?',
+    no: 'No',
+    si: 'Sí',
+    nombre: 'Tu nombre',
+    nombrePh: 'Ej: Camila Soto',
+    comentarios: 'Comentarios (opcional)',
+    comentariosPh: 'Hora estimada de llegada, preguntas, etc.',
+    enviar: 'Enviar reserva por WhatsApp',
+    resumen: 'Resumen',
+    noches: 'Noches',
+    temporada: 'Temporada',
+    alta: 'Alta',
+    baja: 'Baja',
+    mixta: 'Alta y baja',
+    estimado: 'Precio estimado',
+    abono: 'Abono para reservar (50%)',
+    nota: 'Precio estimado. Te confirmamos disponibilidad y valor final por WhatsApp.',
+    elige: 'Elige tus fechas para ver el precio.',
+    errFechas: 'La salida debe ser después de la llegada.',
+    errPasado: 'La llegada no puede ser una fecha pasada.',
+    errMinimo: 'En temporada alta la estadía mínima es de 2 noches.',
+    errPersonas: 'Esta cabaña recibe hasta {n} personas.',
+    errNombre: 'Escribe tu nombre.',
+    errFaltan: 'Completa las fechas de llegada y salida.',
+    msgHola: 'Hola, quiero reservar en Cabañas Alto Captren.',
+    msgPregunta: '¿Está disponible?',
+    msgMascota: 'Mascota',
+    msgNombre: 'Nombre',
+    msgComentarios: 'Comentarios',
+  },
+  en: {
+    cabana: 'Cabin',
+    hasta: 'up to',
+    personasCorto: 'guests',
+    llegada: 'Check-in',
+    salida: 'Check-out',
+    personas: 'Guests',
+    mascota: 'Bringing a pet?',
+    no: 'No',
+    si: 'Yes',
+    nombre: 'Your name',
+    nombrePh: 'e.g. Emma Smith',
+    comentarios: 'Comments (optional)',
+    comentariosPh: 'Estimated arrival time, questions, etc.',
+    enviar: 'Send booking via WhatsApp',
+    resumen: 'Summary',
+    noches: 'Nights',
+    temporada: 'Season',
+    alta: 'High',
+    baja: 'Low',
+    mixta: 'High and low',
+    estimado: 'Estimated price',
+    abono: 'Deposit to book (50%)',
+    nota: 'Estimated price. We will confirm availability and the final price on WhatsApp.',
+    elige: 'Choose your dates to see the price.',
+    errFechas: 'Check-out must be after check-in.',
+    errPasado: 'Check-in cannot be in the past.',
+    errMinimo: 'In high season the minimum stay is 2 nights.',
+    errPersonas: 'This cabin sleeps up to {n} guests.',
+    errNombre: 'Please enter your name.',
+    errFaltan: 'Please choose your check-in and check-out dates.',
+    msgHola: 'Hi, I would like to book at Alto Captren Cabins.',
+    msgPregunta: 'Is it available?',
+    msgMascota: 'Pet',
+    msgNombre: 'Name',
+    msgComentarios: 'Comments',
+  },
+}[lang];
+
+const datosCabanas = cabanas.map((c) => ({
+  id: c.id,
+  nombre: c.nombre[lang],
+  capacidad: c.capacidad,
+  alta: c.precio.alta,
+  baja: c.precio.baja,
+}));
+const maxPersonas = Math.max(...cabanas.map((c) => c.capacidad));
+---
+
+<form class="reserva" id="form-reserva" novalidate>
+  <div class="campos">
+    <label class="campo campo-ancho">
+      <span>{t.cabana}</span>
+      <select name="cabana" required>
+        {
+          datosCabanas.map((c) => (
+            <option value={c.id}>
+              {c.nombre} · {t.hasta} {c.capacidad} {t.personasCorto}
+            </option>
+          ))
+        }
+      </select>
+    </label>
+
+    <label class="campo">
+      <span>{t.llegada}</span>
+      <input type="date" name="llegada" required />
+    </label>
+
+    <label class="campo">
+      <span>{t.salida}</span>
+      <input type="date" name="salida" required />
+    </label>
+
+    <label class="campo">
+      <span>{t.personas}</span>
+      <input type="number" name="personas" min="1" max={maxPersonas} value="2" required inputmode="numeric" />
+    </label>
+
+    <label class="campo">
+      <span>{t.mascota}</span>
+      <select name="mascota">
+        <option value="no">{t.no}</option>
+        <option value="si">{t.si}</option>
+      </select>
+    </label>
+
+    <label class="campo campo-ancho">
+      <span>{t.nombre}</span>
+      <input type="text" name="nombre" autocomplete="name" placeholder={t.nombrePh} required />
+    </label>
+
+    <label class="campo campo-ancho">
+      <span>{t.comentarios}</span>
+      <textarea name="comentarios" rows="3" placeholder={t.comentariosPh}></textarea>
+    </label>
+  </div>
+
+  <aside class="resumen" aria-live="polite">
+    <h3>{t.resumen}</h3>
+    <p class="resumen-vacio" data-vacio>{t.elige}</p>
+    <dl data-detalle hidden>
+      <div><dt>{t.noches}</dt><dd data-noches></dd></div>
+      <div><dt>{t.temporada}</dt><dd data-temporada></dd></div>
+      <div class="total"><dt>{t.estimado}</dt><dd data-total></dd></div>
+      <div><dt>{t.abono}</dt><dd data-abono></dd></div>
+    </dl>
+    <p class="error" data-error role="alert" hidden></p>
+    <button type="submit" class="btn btn-whatsapp">
+      <Icon name="send" size={20} />
+      {t.enviar}
+    </button>
+    <p class="nota">{t.nota}</p>
+  </aside>
+</form>
+
+<script is:inline define:vars={{ cabanas: datosCabanas, t, lang, whatsapp: WHATSAPP }}>
+  (function () {
+    var form = document.getElementById('form-reserva');
+    if (!form) return;
+    var $ = function (sel) { return form.querySelector(sel); };
+    var campo = function (n) { return form.elements.namedItem(n); };
+    var locale = lang === 'es' ? 'es-CL' : 'en-US';
+
+    function hoyISO() {
+      var d = new Date();
+      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+      return d.toISOString().slice(0, 10);
+    }
+    function aFecha(iso) {
+      var p = iso.split('-').map(Number);
+      return new Date(p[0], p[1] - 1, p[2]);
+    }
+    function sumarDias(iso, n) {
+      var d = aFecha(iso);
+      d.setDate(d.getDate() + n);
+      d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+      return d.toISOString().slice(0, 10);
+    }
+    function esAlta(fecha) {
+      var m = fecha.getMonth() + 1; // dic-feb y jul-ago
+      return m === 12 || m === 1 || m === 2 || m === 7 || m === 8;
+    }
+    function clp(n) {
+      return '$' + n.toLocaleString('es-CL');
+    }
+    function bonita(iso) {
+      return aFecha(iso).toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    function cabanaActual() {
+      var id = campo('cabana').value;
+      return cabanas.find(function (c) { return c.id === id; }) || cabanas[0];
+    }
+
+    // Valores iniciales: hoy como mínimo y cabaña desde la URL (?cabana=cabana-1)
+    var hoy = hoyISO();
+    campo('llegada').min = hoy;
+    campo('salida').min = sumarDias(hoy, 1);
+    var params = new URLSearchParams(location.search);
+    if (params.get('cabana')) campo('cabana').value = params.get('cabana');
+    if (params.get('llegada')) campo('llegada').value = params.get('llegada');
+    if (params.get('salida')) campo('salida').value = params.get('salida');
+    if (params.get('personas')) campo('personas').value = params.get('personas');
+
+    function calcular() {
+      var c = cabanaActual();
+      campo('personas').max = c.capacidad;
+      var lleg = campo('llegada').value;
+      var sal = campo('salida').value;
+      if (lleg) campo('salida').min = sumarDias(lleg, 1);
+      if (!lleg || !sal || sal <= lleg) return null;
+      var noches = 0, total = 0, altas = 0;
+      for (var iso = lleg; iso < sal; iso = sumarDias(iso, 1)) {
+        var alta = esAlta(aFecha(iso));
+        noches++;
+        if (alta) altas++;
+        total += alta ? c.alta : c.baja;
+      }
+      return { c: c, lleg: lleg, sal: sal, noches: noches, altas: altas, total: total };
+    }
+
+    function pintar() {
+      var r = calcular();
+      $('[data-vacio]').hidden = !!r;
+      $('[data-detalle]').hidden = !r;
+      if (!r) return;
+      $('[data-noches]').textContent = String(r.noches);
+      $('[data-temporada]').textContent = r.altas === 0 ? t.baja : r.altas === r.noches ? t.alta : t.mixta;
+      $('[data-total]').textContent = clp(r.total);
+      $('[data-abono]').textContent = clp(Math.round(r.total / 2));
+    }
+
+    function error(msg) {
+      var e = $('[data-error]');
+      e.textContent = msg || '';
+      e.hidden = !msg;
+    }
+
+    form.addEventListener('input', function () { error(''); pintar(); });
+    form.addEventListener('change', pintar);
+    pintar();
+
+    form.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var lleg = campo('llegada').value, sal = campo('salida').value;
+      if (!lleg || !sal) return error(t.errFaltan);
+      if (lleg < hoy) return error(t.errPasado);
+      if (sal <= lleg) return error(t.errFechas);
+      var r = calcular();
+      if (r.altas > 0 && r.noches < 2) return error(t.errMinimo);
+      var personas = Number(campo('personas').value);
+      if (!personas || personas < 1 || personas > r.c.capacidad) return error(t.errPersonas.replace('{n}', r.c.capacidad));
+      var nombre = campo('nombre').value.trim();
+      if (!nombre) { campo('nombre').focus(); return error(t.errNombre); }
+
+      var lineas = [
+        t.msgHola,
+        '',
+        '• ' + t.cabana + ': ' + r.c.nombre,
+        '• ' + t.llegada + ': ' + bonita(lleg),
+        '• ' + t.salida + ': ' + bonita(sal) + ' (' + r.noches + ' ' + t.noches.toLowerCase() + ')',
+        '• ' + t.personas + ': ' + personas,
+        '• ' + t.msgMascota + ': ' + (campo('mascota').value === 'si' ? t.si : t.no),
+        '• ' + t.msgNombre + ': ' + nombre,
+      ];
+      var com = campo('comentarios').value.trim();
+      if (com) lineas.push('• ' + t.msgComentarios + ': ' + com);
+      lineas.push('', t.estimado + ': ' + clp(r.total) + ' · ' + t.abono + ': ' + clp(Math.round(r.total / 2)), '', t.msgPregunta);
+
+      location.href = 'https://wa.me/' + whatsapp + '?text=' + encodeURIComponent(lineas.join('\n'));
+    });
+  })();
+</script>
+
+<style>
+  .reserva {
+    display: grid;
+    gap: 1.5rem;
+    grid-template-columns: 1fr;
+    align-items: start;
+  }
+
+  @media (min-width: 860px) {
+    .reserva {
+      grid-template-columns: 1.5fr 1fr;
+    }
+  }
+
+  .campos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #fff;
+    border-radius: 20px;
+    box-shadow: var(--sombra);
+  }
+
+  .campo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--bosque);
+  }
+
+  .campo-ancho {
+    grid-column: 1 / -1;
+  }
+
+  .campo input,
+  .campo select,
+  .campo textarea {
+    font: inherit;
+    font-weight: 400;
+    font-size: 1rem;
+    color: var(--texto);
+    padding: 0.7rem 0.8rem;
+    border: 1.5px solid #d9d3c4;
+    border-radius: 12px;
+    background: var(--nieve);
+    transition:
+      border-color 0.2s ease,
+      box-shadow 0.2s ease;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .campo input:focus,
+  .campo select:focus,
+  .campo textarea:focus {
+    outline: none;
+    border-color: var(--bosque-claro);
+    box-shadow: 0 0 0 4px rgb(47 86 67 / 0.15);
+    background: #fff;
+  }
+
+  .resumen {
+    position: sticky;
+    top: 84px;
+    padding: 1.5rem;
+    border-radius: 20px;
+    background: var(--bosque);
+    color: var(--crema);
+  }
+
+  .resumen h3 {
+    margin: 0 0 0.8rem;
+    color: #fff;
+  }
+
+  .resumen-vacio {
+    margin: 0 0 1rem;
+    opacity: 0.85;
+  }
+
+  .resumen dl {
+    margin: 0 0 1rem;
+  }
+
+  .resumen dl div {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid rgb(255 255 255 / 0.12);
+  }
+
+  .resumen dd {
+    margin: 0;
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .resumen .total dd {
+    font-size: 1.35rem;
+    color: #f3c98b;
+  }
+
+  .error {
+    margin: 0 0 1rem;
+    padding: 0.6rem 0.8rem;
+    border-radius: 10px;
+    background: #fde8e4;
+    color: #8a2a1a;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .btn-whatsapp {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    font: inherit;
+    font-weight: 700;
+    background: #25d366;
+    color: #0b3d1f;
+  }
+
+  .btn-whatsapp:hover {
+    background: #1ebe5b;
+  }
+
+  .nota {
+    margin: 0.8rem 0 0;
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+
+  @media (max-width: 480px) {
+    .campos {
+      grid-template-columns: 1fr;
+      padding: 1.1rem;
+    }
+  }
+</style>
