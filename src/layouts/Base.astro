@@ -10,6 +10,12 @@ import InterruptorTema from '../components/InterruptorTema.astro';
 import { enlaceWhatsApp, WHATSAPP_VISIBLE } from '../config';
 import { otherLang, useTranslations, type Lang } from '../i18n/ui';
 import { url } from '../lib/url';
+import { getImage } from 'astro:assets';
+import fotoCabanas from '../assets/cabana-verano.jpg';
+import fotoUbicacion from '../assets/volcan-camino.jpg';
+import fotoActividades from '../assets/salto-captren.jpg';
+import fotoPreguntas from '../assets/cabana-invierno.jpg';
+import fotoReservar from '../assets/portada-llaima.jpg';
 
 interface Props {
   lang: Lang;
@@ -29,16 +35,48 @@ const pageDescription = description ?? t('site.description');
 const home = url(`${lang}/`);
 const year = new Date().getFullYear();
 
-const navItems: { label: string; href: string }[] = [
+/** Foto pequeña para la vista previa del menú. */
+const miniatura = async (foto: ImageMetadata) =>
+  (await getImage({ src: foto, width: 480, height: 270, format: 'webp', quality: 70 })).src;
+
+const reservar = url(`${lang}/reservar/`);
+
+interface Vista {
+  foto: string;
+  texto: string;
+  icono: string;
+}
+
+const navItems: { label: string; href: string; vista?: Vista }[] = [
   { label: t('nav.home'), href: home },
-  { label: t('nav.cabins'), href: url(`${lang}/cabanas/`) },
-  { label: t('nav.location'), href: url(`${lang}/ubicacion/`) },
-  { label: t('nav.activities'), href: url(`${lang}/actividades/`) },
-  { label: t('nav.faq'), href: url(`${lang}/preguntas/`) },
+  {
+    label: t('nav.cabins'),
+    href: url(`${lang}/cabanas/`),
+    vista: { foto: await miniatura(fotoCabanas), texto: t('menu.cabins'), icono: 'house' },
+  },
+  {
+    label: t('nav.location'),
+    href: url(`${lang}/ubicacion/`),
+    vista: { foto: await miniatura(fotoUbicacion), texto: t('menu.location'), icono: 'map-pin' },
+  },
+  {
+    label: t('nav.activities'),
+    href: url(`${lang}/actividades/`),
+    vista: { foto: await miniatura(fotoActividades), texto: t('menu.activities'), icono: 'mountain' },
+  },
+  {
+    label: t('nav.faq'),
+    href: url(`${lang}/preguntas/`),
+    vista: { foto: await miniatura(fotoPreguntas), texto: t('menu.faq'), icono: 'circle-help' },
+  },
   { label: t('nav.contact'), href: '#contacto' },
 ];
+const vistaReservar: Vista = {
+  foto: await miniatura(fotoReservar),
+  texto: t('menu.book'),
+  icono: 'calendar-check',
+};
 const current = Astro.url.pathname;
-const reservar = url(`${lang}/reservar/`);
 const waHola = enlaceWhatsApp(t('wa.hola'));
 ---
 
@@ -87,9 +125,26 @@ const waHola = enlaceWhatsApp(t('wa.hola'));
           <span>{t('site.name')}</span>
         </a>
         <InterruptorTema lang={lang} />
-        <a class="btn btn-header" href={reservar} aria-current={reservar === current ? 'page' : undefined}>
-          {t('nav.book')}
-        </a>
+        <div class="btn-header-caja con-vista">
+          <a class="btn btn-header" href={reservar} aria-current={reservar === current ? 'page' : undefined}>
+            <Icon name="calendar-check" size={17} />
+            {t('nav.book')}
+          </a>
+          <a class="vista vista-derecha" href={reservar} tabindex="-1" aria-hidden="true">
+            <img src={vistaReservar.foto} alt="" width="480" height="270" loading="lazy" decoding="async" />
+            <span class="vista-cuerpo">
+              <span class="vista-titulo">
+                <Icon name={vistaReservar.icono} size={18} />
+                {t('nav.book')}
+              </span>
+              <span class="vista-texto">{vistaReservar.texto}</span>
+              <span class="vista-ver">
+                {t('menu.ver')}
+                <Icon name="arrow-right" size={16} />
+              </span>
+            </span>
+          </a>
+        </div>
         <a class="lang-switch" href={url(`${other}/${path}`)} hreflang={other} lang={other}>
           {other.toUpperCase()}
           <span class="sr-only">{t('lang.switch')}</span>
@@ -102,10 +157,34 @@ const waHola = enlaceWhatsApp(t('wa.hola'));
           <ul class="nav-list">
             {
               navItems.map((item) => (
-                <li>
-                  <a href={item.href} aria-current={item.href === current ? 'page' : undefined}>
-                    {item.label}
+                <li class:list={[{ 'con-vista': item.vista }]}>
+                  <a
+                    class="nav-enlace"
+                    href={item.href}
+                    aria-current={item.href === current ? 'page' : undefined}
+                  >
+                    {item.vista && <Icon name={item.vista.icono} size={20} class="nav-icono" />}
+                    <span class="nav-texto">
+                      {item.label}
+                      {item.vista && <span class="nav-sub">{item.vista.texto}</span>}
+                    </span>
                   </a>
+                  {item.vista && (
+                    <a class="vista" href={item.href} tabindex="-1" aria-hidden="true">
+                      <img src={item.vista.foto} alt="" width="480" height="270" loading="lazy" decoding="async" />
+                      <span class="vista-cuerpo">
+                        <span class="vista-titulo">
+                          <Icon name={item.vista.icono} size={18} />
+                          {item.label}
+                        </span>
+                        <span class="vista-texto">{item.vista.texto}</span>
+                        <span class="vista-ver">
+                          {t('menu.ver')}
+                          <Icon name="arrow-right" size={16} />
+                        </span>
+                      </span>
+                    </a>
+                  )}
                 </li>
               ))
             }
