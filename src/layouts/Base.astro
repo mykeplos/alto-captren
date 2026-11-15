@@ -8,6 +8,7 @@ import IconoMarca from '../components/IconoMarca.astro';
 import Logo from '../components/Logo.astro';
 import InterruptorTema from '../components/InterruptorTema.astro';
 import Visor from '../components/Visor.astro';
+import BarraReserva from '../components/BarraReserva.astro';
 import { enlaceWhatsApp, WHATSAPP_VISIBLE } from '../config';
 import { otherLang, useTranslations, type Lang } from '../i18n/ui';
 import { url } from '../lib/url';
@@ -270,6 +271,7 @@ const waHola = enlaceWhatsApp(t('wa.hola'));
       <span class="wa-texto">{t('wa.flotante')}</span>
     </a>
     <Visor lang={lang} />
+    {reservar !== current && <BarraReserva lang={lang} />}
     <script is:inline>
       // Efectos: bloques que aparecen al hacer scroll y sombra del encabezado
       (function () {
