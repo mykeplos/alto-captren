@@ -4,6 +4,8 @@ import '@fontsource-variable/fraunces';
 import '../styles/global.css';
 import Icon from '../components/Icon.astro';
 import IconoMarca from '../components/IconoMarca.astro';
+import Logo from '../components/Logo.astro';
+import InterruptorTema from '../components/InterruptorTema.astro';
 import { enlaceWhatsApp, WHATSAPP_VISIBLE } from '../config';
 import { otherLang, useTranslations, type Lang } from '../i18n/ui';
 import { url } from '../lib/url';
@@ -46,22 +48,44 @@ const waHola = enlaceWhatsApp(t('wa.hola'));
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>{pageTitle}</title>
     <meta name="description" content={pageDescription} />
-    <link rel="icon" type="image/svg+xml" href={url('favicon.svg')} />
+    <link rel="icon" type="image/png" sizes="32x32" href={url('logo/favicon-32.png')} />
+    <link rel="icon" type="image/png" sizes="64x64" href={url('logo/favicon-64.png')} />
+    <link rel="apple-touch-icon" href={url('logo/apple-touch-icon.png')} />
     <link rel="alternate" hreflang={lang} href={new URL(url(`${lang}/${path}`), Astro.site)} />
     <link rel="alternate" hreflang={other} href={new URL(url(`${other}/${path}`), Astro.site)} />
     <meta name="theme-color" content="#1f3a2e" />
-    <!-- Marca que hay JavaScript: solo así se esconden los bloques que aparecen al hacer scroll -->
+    <!-- Vista previa al compartir el enlace (WhatsApp, Facebook) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={pageDescription} />
+    <meta property="og:url" content={new URL(Astro.url.pathname, Astro.site)} />
+    <meta property="og:image" content={new URL(url('logo/compartir.jpg'), Astro.site)} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:locale" content={lang === 'es' ? 'es_CL' : 'en_US'} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- Marca que hay JavaScript y aplica el tema (día/noche) antes de pintar, para que no parpadee -->
     <script is:inline>
-      document.documentElement.classList.add('js');
+      (function () {
+        var raiz = document.documentElement;
+        raiz.classList.add('js');
+        var tema = null;
+        try {
+          tema = localStorage.getItem('tema');
+        } catch (e) {}
+        if (!tema) tema = matchMedia('(prefers-color-scheme: dark)').matches ? 'noche' : 'dia';
+        raiz.setAttribute('data-tema', tema);
+      })();
     </script>
   </head>
   <body class:list={[{ 'encabezado-transparente': encabezadoTransparente }]}>
     <header class="site-header">
       <div class="container header-inner">
         <a class="brand" href={home}>
-          <img src={url('favicon.svg')} alt="" width="32" height="32" />
+          <Logo size={44} loading="eager" />
           <span>{t('site.name')}</span>
         </a>
+        <InterruptorTema lang={lang} />
         <a class="btn btn-header" href={reservar} aria-current={reservar === current ? 'page' : undefined}>
           {t('nav.book')}
         </a>
@@ -119,7 +143,7 @@ const waHola = enlaceWhatsApp(t('wa.hola'));
       <div class="container footer-grid">
         <div class="footer-marca">
           <p class="footer-name">
-            <img src={url('favicon.svg')} alt="" width="36" height="36" />
+            <Logo size={88} />
             {t('site.name')}
           </p>
           <p>{t('site.tagline')}.</p>
