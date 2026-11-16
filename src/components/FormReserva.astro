@@ -49,6 +49,7 @@ const t = {
     msgMascota: 'Mascota',
     msgNombre: 'Nombre',
     msgComentarios: 'Comentarios',
+    elegirFecha: 'Elegir en el calendario',
   },
   en: {
     cabana: 'Cabin',
@@ -87,6 +88,7 @@ const t = {
     msgMascota: 'Pet',
     msgNombre: 'Name',
     msgComentarios: 'Comments',
+    elegirFecha: 'Pick on the calendar',
   },
 }[lang];
 
@@ -117,11 +119,19 @@ const maxPersonas = Math.max(...cabanas.map((c) => c.capacidad));
 
     <label class="campo">
       <span>{t.llegada}</span>
+      <button type="button" class="fecha-vista" data-vista="llegada">
+        <Icon name="calendar-days" size={18} />
+        <span data-vista-texto>{t.elegirFecha}</span>
+      </button>
       <input type="date" name="llegada" required />
     </label>
 
     <label class="campo">
       <span>{t.salida}</span>
+      <button type="button" class="fecha-vista" data-vista="salida">
+        <Icon name="calendar-days" size={18} />
+        <span data-vista-texto>{t.elegirFecha}</span>
+      </button>
       <input type="date" name="salida" required />
     </label>
 
@@ -232,7 +242,23 @@ const maxPersonas = Math.max(...cabanas.map((c) => c.capacidad));
       return { c: c, lleg: lleg, sal: sal, noches: noches, altas: altas, total: total };
     }
 
+    // Con el calendario activo, las fechas se muestran como botones que llevan al calendario
+    function pintarFechas() {
+      ['llegada', 'salida'].forEach(function (n) {
+        var v = campo(n).value;
+        var vista = $('[data-vista="' + n + '"]');
+        vista.classList.toggle('vacia', !v);
+        vista.querySelector('[data-vista-texto]').textContent = v ? bonita(v) : t.elegirFecha;
+      });
+    }
+    form.addEventListener('click', function (e) {
+      if (!e.target.closest('[data-vista]')) return;
+      var cal = document.getElementById('disponibilidad');
+      if (cal) cal.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+
     function pintar() {
+      pintarFechas();
       var r = calcular();
       $('[data-vacio]').hidden = !!r;
       $('[data-detalle]').hidden = !r;
@@ -351,6 +377,46 @@ const maxPersonas = Math.max(...cabanas.map((c) => c.capacidad));
     border-color: var(--enlace);
     box-shadow: 0 0 0 4px rgb(47 86 67 / 0.15);
     background: var(--superficie);
+  }
+
+  .fecha-vista {
+    display: none;
+  }
+
+  .reserva:global(.con-calendario) input[type='date'] {
+    display: none;
+  }
+
+  .reserva:global(.con-calendario) .fecha-vista {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.7rem 0.8rem;
+    border: 1.5px solid var(--borde);
+    border-radius: 12px;
+    background: var(--campo);
+    color: var(--texto);
+    font: inherit;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.2s ease;
+  }
+
+  .fecha-vista :global(.icono) {
+    flex: none;
+    color: var(--acento);
+  }
+
+  .fecha-vista.vacia {
+    font-weight: 400;
+    color: var(--texto-suave);
+  }
+
+  .fecha-vista:hover {
+    border-color: var(--enlace);
   }
 
   .resumen {
