@@ -20,10 +20,13 @@ const calendarios: Record<string, string> = {
 const configurado = Boolean(clave && calendarios['cabana-1'] && calendarios['cabana-2']);
 // En la PC (npm run dev) sin configurar, muestra días ocupados de ejemplo para poder probar.
 const demo = !configurado && import.meta.env.DEV;
+// Publicado sin Google Calendar: igual se eligen fechas, y la disponibilidad se confirma por WhatsApp.
+const sinDatos = !configurado && !demo;
 
 const t = {
   es: {
     titulo: 'Disponibilidad',
+    tituloFechas: 'Elige tus fechas',
     ayuda: 'Toca tu día de llegada y después tu día de salida.',
     libre: 'Disponible',
     ocupado: 'Ocupado',
@@ -36,10 +39,17 @@ const t = {
     consultar: 'Consultar fechas por WhatsApp',
     choque: 'Esas fechas incluyen noches ocupadas. Elige otra salida.',
     demo: 'Modo de prueba: días ocupados de ejemplo.',
+    sinDatos: 'Elige tus fechas y te confirmamos la disponibilidad por WhatsApp.',
+    eligeSalida: 'ahora elige tu día de salida',
+    noche: 'noche',
+    nochesPl: 'noches',
+    borrar: 'Borrar fechas',
+    minimo: 'En temporada alta la estadía mínima es de 2 noches.',
     dias: ['L', 'M', 'M', 'J', 'V', 'S', 'D'],
   },
   en: {
     titulo: 'Availability',
+    tituloFechas: 'Choose your dates',
     ayuda: 'Tap your check-in day and then your check-out day.',
     libre: 'Available',
     ocupado: 'Booked',
@@ -52,6 +62,12 @@ const t = {
     consultar: 'Ask about dates on WhatsApp',
     choque: 'Those dates include booked nights. Choose another check-out.',
     demo: 'Test mode: sample booked days.',
+    sinDatos: 'Choose your dates and we will confirm availability on WhatsApp.',
+    eligeSalida: 'now choose your check-out day',
+    noche: 'night',
+    nochesPl: 'nights',
+    borrar: 'Clear dates',
+    minimo: 'In high season the minimum stay is 2 nights.',
     dias: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
   },
 }[lang];
@@ -64,7 +80,7 @@ const waConsulta = enlaceWhatsApp(
 
 <section class="calendario" id="disponibilidad" aria-labelledby="cal-titulo">
   <div class="cal-cabecera">
-    <h2 id="cal-titulo">{t.titulo}</h2>
+    <h2 id="cal-titulo">{sinDatos ? t.tituloFechas : t.titulo}</h2>
     <div class="cal-pestanas" role="tablist">
       {
         pestanas.map((p, i) => (
@@ -76,43 +92,47 @@ const waConsulta = enlaceWhatsApp(
     </div>
   </div>
 
+  <p class="cal-ayuda">{t.ayuda}</p>
+  {demo && <p class="cal-demo">{t.demo}</p>}
   {
-    configurado || demo ? (
-      <>
-        <p class="cal-ayuda">{t.ayuda}</p>
-        {demo && <p class="cal-demo">{t.demo}</p>}
-        <div class="cal-nav">
-          <button type="button" class="cal-flecha" data-mover="-1" aria-label={t.anterior}>
-            <Icon name="chevron-left" size={20} />
-          </button>
-          <button type="button" class="cal-flecha" data-mover="1" aria-label={t.siguiente}>
-            <Icon name="chevron-right" size={20} />
-          </button>
-        </div>
-        <div class="cal-meses" data-meses aria-live="polite">
-          <p class="cal-estado">{t.cargando}</p>
-        </div>
-        <p class="cal-aviso" data-aviso role="alert" hidden />
-        <ul class="cal-leyenda">
-          <li><span class="punto libre" /> {t.libre}</li>
-          <li><span class="punto ocupado" /> {t.ocupado}</li>
-          <li><span class="punto elegido" /> {t.elegido}</li>
-        </ul>
-      </>
-    ) : (
-      <div class="cal-pronto">
-        <p>{t.sinCalendario}</p>
-        <a class="btn" href={waConsulta} target="_blank" rel="noopener">
+    sinDatos && (
+      <p class="cal-demo">
+        {t.sinDatos}{' '}
+        <a href={waConsulta} target="_blank" rel="noopener">
           {t.consultar}
         </a>
-      </div>
+      </p>
     )
   }
+  <div class="cal-nav">
+    <div class="cal-seleccion" data-seleccion>
+      <span data-sel-texto></span>
+      <button type="button" class="cal-borrar" data-borrar hidden>
+        <Icon name="x" size={14} />
+        {t.borrar}
+      </button>
+    </div>
+    <button type="button" class="cal-flecha" data-mover="-1" aria-label={t.anterior}>
+      <Icon name="chevron-left" size={20} />
+    </button>
+    <button type="button" class="cal-flecha" data-mover="1" aria-label={t.siguiente}>
+      <Icon name="chevron-right" size={20} />
+    </button>
+  </div>
+  <div class="cal-meses" data-meses aria-live="polite">
+    <p class="cal-estado">{t.cargando}</p>
+  </div>
+  <p class="cal-aviso" data-aviso role="alert" hidden></p>
+  <ul class="cal-leyenda">
+    <li><span class="punto libre"></span> {t.libre}</li>
+    {!sinDatos && <li><span class="punto ocupado"></span> {t.ocupado}</li>}
+    <li><span class="punto elegido"></span> {t.elegido}</li>
+  </ul>
 </section>
 
 {
-  (configurado || demo) && (
-    <script is:inline define:vars={{ clave, calendarios, demo, t, lang }}>
+  (
+    <script is:inline define:vars={{ clave, calendarios, demo, sinDatos, t, lang }}>
       // Espera a que exista el formulario de reserva (está más abajo en la página)
       document.addEventListener('DOMContentLoaded', function () {
         var raiz = document.getElementById('disponibilidad');
@@ -171,6 +191,7 @@ const waConsulta = enlaceWhatsApp(
             datosDemo();
             return Promise.resolve();
           }
+          if (sinDatos) return Promise.resolve();
           var desde = new Date();
           desde.setDate(desde.getDate() - 1);
           var hasta = new Date();
@@ -227,6 +248,39 @@ const waConsulta = enlaceWhatsApp(
           return false;
         }
 
+        function esAlta(iso) {
+          var m = Number(iso.slice(5, 7));
+          return m === 12 || m === 1 || m === 2 || m === 7 || m === 8;
+        }
+        function necesitaMinimo(lleg, sal) {
+          if (sumarDias(lleg, 1) !== sal) return false;
+          return esAlta(lleg);
+        }
+        function bonita(iso) {
+          var p = iso.split('-').map(Number);
+          return new Date(p[0], p[1] - 1, p[2]).toLocaleDateString(locale, { weekday: 'short', day: 'numeric', month: 'short' });
+        }
+        function contarNoches(a, b) {
+          var n = 0;
+          for (var iso = a; iso < b; iso = sumarDias(iso, 1)) n++;
+          return n;
+        }
+        var selTexto = raiz.querySelector('[data-sel-texto]');
+        var borrar = raiz.querySelector('[data-borrar]');
+        function pintarSeleccion() {
+          var s = seleccion();
+          if (s.lleg && s.sal) {
+            var n = contarNoches(s.lleg, s.sal);
+            selTexto.innerHTML =
+              '<strong>' + bonita(s.lleg) + '</strong> → <strong>' + bonita(s.sal) + '</strong> · ' + n + ' ' + (n === 1 ? t.noche : t.nochesPl);
+          } else if (s.lleg) {
+            selTexto.innerHTML = '<strong>' + bonita(s.lleg) + '</strong> → ' + t.eligeSalida;
+          } else {
+            selTexto.textContent = '';
+          }
+          borrar.hidden = !s.lleg;
+        }
+
         function mostrarAviso(msg) {
           aviso.textContent = msg || '';
           aviso.hidden = !msg;
@@ -245,6 +299,7 @@ const waConsulta = enlaceWhatsApp(
               return;
             }
             setCampo('salida', iso);
+            if (necesitaMinimo(s.lleg, iso)) mostrarAviso(t.minimo);
             var destino = document.querySelector('.resumen');
             if (destino && window.matchMedia('(max-width: 859px)').matches) destino.scrollIntoView({ behavior: 'smooth', block: 'center' });
           }
@@ -253,6 +308,7 @@ const waConsulta = enlaceWhatsApp(
 
         function pintar() {
           if (!cargado) return;
+          pintarSeleccion();
           var s = seleccion();
           contenedor.innerHTML = '';
           for (var k = 0; k < MESES_VISIBLES; k++) {
@@ -295,6 +351,12 @@ const waConsulta = enlaceWhatsApp(
         }
 
         raiz.addEventListener('click', function (e) {
+          if (e.target.closest('[data-borrar]')) {
+            setCampo('llegada', '');
+            setCampo('salida', '');
+            mostrarAviso('');
+            return pintar();
+          }
           var dia = e.target.closest('[data-dia]');
           if (dia && !dia.disabled) return elegir(dia.getAttribute('data-dia'));
           var mover = e.target.closest('[data-mover]');
@@ -314,7 +376,22 @@ const waConsulta = enlaceWhatsApp(
           }
         });
 
+        // Vista previa del rango al pasar el mouse, después de elegir la llegada
+        contenedor.addEventListener('mouseover', function (e) {
+          var dia = e.target.closest('[data-dia]');
+          var s = seleccion();
+          var hasta = dia && !dia.disabled && s.lleg && !s.sal ? dia.getAttribute('data-dia') : '';
+          contenedor.querySelectorAll('[data-dia]').forEach(function (b) {
+            var iso = b.getAttribute('data-dia');
+            b.classList.toggle('previa', !!hasta && iso > s.lleg && iso <= hasta);
+          });
+        });
+        contenedor.addEventListener('mouseleave', function () {
+          contenedor.querySelectorAll('.previa').forEach(function (b) { b.classList.remove('previa'); });
+        });
+
         if (form) {
+          form.classList.add('con-calendario');
           form.addEventListener('change', function (e) {
             if (e.target.name === 'cabana' && e.target.value !== cabana) {
               cabana = e.target.value;
@@ -416,9 +493,56 @@ const waConsulta = enlaceWhatsApp(
 
   .cal-nav {
     display: flex;
+    align-items: center;
     justify-content: flex-end;
     gap: 0.4rem;
-    margin-top: 0.6rem;
+    margin-top: 0.8rem;
+  }
+
+  .cal-seleccion {
+    flex: 1;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3rem 0.8rem;
+    min-width: 0;
+    font-size: 0.92rem;
+    color: var(--texto-suave);
+  }
+
+  .cal-seleccion :global(strong) {
+    color: var(--titulo);
+    font-family: var(--fuente-ui);
+  }
+
+  .cal-borrar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--borde);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--texto-suave);
+    font: inherit;
+    font-family: var(--fuente-ui);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .cal-borrar[hidden] {
+    display: none;
+  }
+
+  .cal-borrar:hover {
+    background: var(--chip);
+    color: var(--titulo);
+  }
+
+  .cal-demo a {
+    color: var(--enlace);
+    font-weight: 600;
   }
 
   .cal-flecha {
@@ -507,6 +631,11 @@ const waConsulta = enlaceWhatsApp(
 
   .cal-meses :global(.cal-dia.rango) {
     background: rgb(47 86 67 / 0.18);
+    border-radius: 6px;
+  }
+
+  .cal-meses :global(.cal-dia.previa) {
+    background: rgb(47 86 67 / 0.12);
     border-radius: 6px;
   }
 
