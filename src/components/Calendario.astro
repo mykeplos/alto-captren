@@ -34,7 +34,7 @@ const t = {
     anterior: 'Mes anterior',
     siguiente: 'Mes siguiente',
     cargando: 'Cargando disponibilidad…',
-    error: 'No pudimos cargar el calendario. Escríbenos por WhatsApp y te confirmamos las fechas.',
+    error: 'No pudimos cargar los días ocupados. Elige tus fechas igual y te confirmamos la disponibilidad por WhatsApp.',
     sinCalendario: 'El calendario de disponibilidad estará disponible muy pronto. Mientras tanto, consúltanos las fechas por WhatsApp.',
     consultar: 'Consultar fechas por WhatsApp',
     choque: 'Esas fechas incluyen noches ocupadas. Elige otra salida.',
@@ -57,7 +57,7 @@ const t = {
     anterior: 'Previous month',
     siguiente: 'Next month',
     cargando: 'Loading availability…',
-    error: 'We could not load the calendar. Message us on WhatsApp and we will confirm your dates.',
+    error: 'We could not load the booked days. Choose your dates anyway and we will confirm availability on WhatsApp.',
     sinCalendario: 'The availability calendar is coming soon. Meanwhile, ask us about your dates on WhatsApp.',
     consultar: 'Ask about dates on WhatsApp',
     choque: 'Those dates include booked nights. Choose another check-out.',
@@ -104,6 +104,7 @@ const waConsulta = enlaceWhatsApp(
       </p>
     )
   }
+  <p class="cal-demo" data-error-carga hidden>{t.error}</p>
   <div class="cal-nav">
     <div class="cal-seleccion" data-seleccion>
       <span data-sel-texto></span>
@@ -422,7 +423,11 @@ const waConsulta = enlaceWhatsApp(
             pintar();
           })
           .catch(function () {
-            contenedor.innerHTML = '<p class="cal-estado">' + t.error + '</p>';
+            // Si Google falla, igual se pueden elegir fechas (sin días ocupados)
+            Object.keys(ocupados).forEach(function (id) { ocupados[id].clear(); });
+            raiz.querySelector('[data-error-carga]').hidden = false;
+            cargado = true;
+            pintar();
           });
       });
     </script>
