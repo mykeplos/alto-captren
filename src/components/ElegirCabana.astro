@@ -1,0 +1,535 @@
+---
+// "¿Cuál cabaña me conviene?": eliges cuántos son y se marca la cabaña que sirve,
+// con una tabla para comparar las dos lado a lado.
+import { cabanas, clp } from '../data/cabanas';
+import { enlaceWhatsApp } from '../config';
+import type { Lang } from '../i18n/ui';
+import { url } from '../lib/url';
+import Icon from './Icon.astro';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const maxTotal = cabanas.reduce((s, c) => s + c.capacidad, 0);
+// Cabañas de la más económica a la más cara, para recomendar la que alcanza y cuesta menos
+const porPrecio = [...cabanas].sort((a, b) => a.precio.baja - b.precio.baja);
+
+const t =
+  lang === 'es'
+    ? {
+        eyebrow: 'Compara',
+        titulo: '¿Cuál cabaña te conviene?',
+        pregunta: '¿Cuántos son?',
+        menos: 'Una persona menos',
+        mas: 'Una persona más',
+        persona: 'persona',
+        personasPl: 'personas',
+        filas: {
+          personas: 'Personas',
+          dormitorios: 'Dormitorios',
+          camas: 'Camas',
+          bano: 'Baño',
+          alta: 'Temporada alta',
+          baja: 'Temporada baja',
+        },
+        hasta: 'Hasta',
+        noche: '/ noche',
+        recomendada: 'Recomendada',
+        sirve: 'Te sirve',
+        noSirve: 'Muy pequeña',
+        reservar: 'Reservar',
+        // {n} = personas, {c} = cabaña, {p} = precio
+        msgUna: 'Para {n}, te recomendamos la {c}: es la más económica que les sirve, desde {p} la noche.',
+        msgDos: 'Son {n}: necesitan las dos cabañas (hasta {max} personas en total). Escríbenos y te armamos la reserva de ambas.',
+        ambas: 'Las dos',
+        waDos: 'Hola, somos {n} personas y queremos arrendar las dos cabañas. ¿Qué fechas tienen disponibles?',
+        escribenos: 'Reservar las dos por WhatsApp',
+      }
+    : {
+        eyebrow: 'Compare',
+        titulo: 'Which cabin is right for you?',
+        pregunta: 'How many guests?',
+        menos: 'One guest fewer',
+        mas: 'One more guest',
+        persona: 'guest',
+        personasPl: 'guests',
+        filas: {
+          personas: 'Guests',
+          dormitorios: 'Bedrooms',
+          camas: 'Beds',
+          bano: 'Bathroom',
+          alta: 'High season',
+          baja: 'Low season',
+        },
+        hasta: 'Up to',
+        noche: '/ night',
+        recomendada: 'Recommended',
+        sirve: 'Fits',
+        noSirve: 'Too small',
+        reservar: 'Book now',
+        msgUna: 'For {n}, we recommend {c}: the most affordable one that fits you, from {p} per night.',
+        msgDos: 'You are {n}: you need both cabins (up to {max} guests in total). Message us and we will set up both bookings.',
+        ambas: 'Both',
+        waDos: 'Hi, we are {n} guests and would like to book both cabins. Which dates are available?',
+        escribenos: 'Book both via WhatsApp',
+      };
+
+// Datos que necesita el script (capacidad y precio de cada cabaña, de la más barata a la más cara)
+const datos = porPrecio.map((c) => ({ id: c.id, nombre: c.nombre[lang], capacidad: c.capacidad, baja: clp(c.precio.baja) }));
+const base = url(`${lang}/reservar/`);
+---
+
+<section class="container elegir" id="comparar" data-elegir data-max={maxTotal} data-cabanas={JSON.stringify(datos)} data-textos={JSON.stringify(t)} data-wa={enlaceWhatsApp('')}>
+  <div class="elegir-cabeza">
+    <div>
+      <p class="eyebrow">{t.eyebrow}</p>
+      <h2>{t.titulo}</h2>
+    </div>
+    <div class="contador" role="group" aria-label={t.pregunta}>
+      <span class="contador-pregunta"><Icon name="users" size={18} /> {t.pregunta}</span>
+      <div class="contador-control">
+        <button type="button" data-paso="-1" aria-label={t.menos}><Icon name="minus" size={18} /></button>
+        <output aria-live="polite"><strong data-n>2</strong> <span data-n-texto>{t.personasPl}</span></output>
+        <button type="button" data-paso="1" aria-label={t.mas}><Icon name="plus" size={18} /></button>
+      </div>
+    </div>
+  </div>
+
+  <p class="mensaje" aria-live="polite">
+    <Icon name="sparkles" size={18} />
+    <span data-mensaje></span>
+  </p>
+  <a class="btn wa-dos" data-wa-dos href="#" target="_blank" rel="noopener" hidden>{t.escribenos}</a>
+
+  <div class="tabla-caja">
+    <table class="tabla">
+      <thead>
+        <tr>
+          <td></td>
+          {
+            cabanas.map((c) => (
+              <th scope="col" data-col={c.id}>
+                <span class="sello" data-sello></span>
+                <span class="tabla-nombre">{c.nombre[lang]}</span>
+              </th>
+            ))
+          }
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <th scope="row"><Icon name="users" size={16} /> {t.filas.personas}</th>
+          {cabanas.map((c) => <td data-col={c.id}><strong>{t.hasta} {c.capacidad}</strong></td>)}
+        </tr>
+        <tr>
+          <th scope="row"><Icon name="door-open" size={16} /> {t.filas.dormitorios}</th>
+          {cabanas.map((c) => <td data-col={c.id}>{c.dormitorios}</td>)}
+        </tr>
+        <tr>
+          <th scope="row"><Icon name="bed" size={16} /> {t.filas.camas}</th>
+          {
+            cabanas.map((c) => (
+              <td data-col={c.id}>
+                <ul class="camas">
+                  {c.piezas.map((p) => (
+                    <li>{p[lang]}</li>
+                  ))}
+                </ul>
+              </td>
+            ))
+          }
+        </tr>
+        <tr>
+          <th scope="row"><Icon name="bath" size={16} /> {t.filas.bano}</th>
+          {cabanas.map((c) => <td data-col={c.id}>{c.banos}</td>)}
+        </tr>
+        <tr>
+          <th scope="row">{t.filas.alta}</th>
+          {cabanas.map((c) => <td data-col={c.id} class="precio">{clp(c.precio.alta)} <small>{t.noche}</small></td>)}
+        </tr>
+        <tr>
+          <th scope="row">{t.filas.baja}</th>
+          {cabanas.map((c) => <td data-col={c.id} class="precio">{clp(c.precio.baja)} <small>{t.noche}</small></td>)}
+        </tr>
+      </tbody>
+      <tfoot>
+        <tr>
+          <td></td>
+          {
+            cabanas.map((c) => (
+              <td data-col={c.id}>
+                <a class="btn tabla-btn" data-reservar={c.id} href={`${base}?cabana=${c.id}&personas=2`}>
+                  {t.reservar}
+                </a>
+              </td>
+            ))
+          }
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+</section>
+
+<script is:inline>
+  (function () {
+    document.querySelectorAll('[data-elegir]').forEach(function (caja) {
+      var t = JSON.parse(caja.getAttribute('data-textos'));
+      var cabanas = JSON.parse(caja.getAttribute('data-cabanas'));
+      var max = Number(caja.getAttribute('data-max'));
+      var wa = caja.getAttribute('data-wa');
+      var n = 2;
+
+      function pintar() {
+        caja.querySelector('[data-n]').textContent = n;
+        caja.querySelector('[data-n-texto]').textContent = n === 1 ? t.persona : t.personasPl;
+        caja.querySelector('[data-paso="-1"]').disabled = n <= 1;
+        caja.querySelector('[data-paso="1"]').disabled = n >= max;
+
+        var quien = n + ' ' + (n === 1 ? t.persona : t.personasPl);
+        // La más económica que alcanza
+        var elegida = null;
+        for (var i = 0; i < cabanas.length; i++) {
+          if (cabanas[i].capacidad >= n) {
+            elegida = cabanas[i];
+            break;
+          }
+        }
+        var mensaje;
+        var waDos = caja.querySelector('[data-wa-dos]');
+        if (elegida) {
+          mensaje = t.msgUna.replace('{n}', quien).replace('{c}', elegida.nombre).replace('{p}', elegida.baja);
+          waDos.hidden = true;
+        } else {
+          mensaje = t.msgDos.replace('{n}', quien).replace('{max}', max);
+          waDos.hidden = false;
+          waDos.href = wa + '?text=' + encodeURIComponent(t.waDos.replace('{n}', n));
+        }
+        caja.querySelector('[data-mensaje]').textContent = mensaje;
+
+        cabanas.forEach(function (c) {
+          var sirve = c.capacidad >= n;
+          var estado = !elegida ? 'ambas' : c.id === elegida.id ? 'recomendada' : sirve ? 'sirve' : 'no-sirve';
+          caja.querySelectorAll('[data-col="' + c.id + '"]').forEach(function (celda) {
+            celda.setAttribute('data-estado', estado);
+          });
+          var sello = caja.querySelector('th[data-col="' + c.id + '"] [data-sello]');
+          sello.textContent =
+            estado === 'recomendada'
+              ? t.recomendada
+              : estado === 'no-sirve'
+                ? t.noSirve
+                : estado === 'ambas'
+                  ? t.ambas
+                  : t.sirve;
+          var boton = caja.querySelector('[data-reservar="' + c.id + '"]');
+          boton.href = boton.href.replace(/personas=\d+/, 'personas=' + Math.min(n, c.capacidad));
+          boton.classList.toggle('apagado', estado === 'no-sirve');
+        });
+      }
+
+      caja.querySelectorAll('[data-paso]').forEach(function (b) {
+        b.addEventListener('click', function () {
+          n = Math.max(1, Math.min(max, n + Number(b.getAttribute('data-paso'))));
+          pintar();
+        });
+      });
+      pintar();
+    });
+  })();
+</script>
+
+<style>
+  .elegir {
+    padding-top: 2.5rem;
+  }
+
+  .elegir-cabeza {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem 2rem;
+  }
+
+  .elegir-cabeza h2 {
+    margin: 0.2rem 0 0;
+  }
+
+  .eyebrow {
+    margin: 0;
+  }
+
+  .contador {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem 1rem;
+  }
+
+  .contador-pregunta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-family: var(--fuente-ui);
+    font-weight: 700;
+    color: var(--titulo);
+  }
+
+  .contador-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3rem;
+    border-radius: 999px;
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    box-shadow: var(--sombra);
+  }
+
+  .contador-control button {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--chip);
+    color: var(--titulo);
+    cursor: pointer;
+    transition:
+      background-color 0.2s ease,
+      transform 0.15s ease;
+  }
+
+  .contador-control button:hover:not(:disabled) {
+    background: var(--madera);
+    color: #fff;
+  }
+
+  .contador-control button:active:not(:disabled) {
+    transform: scale(0.92);
+  }
+
+  .contador-control button:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .contador-control output {
+    min-width: 7.2rem;
+    text-align: center;
+    font-family: var(--fuente-ui);
+    color: var(--texto-suave);
+  }
+
+  .contador-control output strong {
+    font-size: 1.25rem;
+    color: var(--titulo);
+  }
+
+  .mensaje {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin: 1.4rem 0 0;
+    padding: 0.85rem 1.1rem;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--madera) 12%, var(--superficie));
+    color: var(--texto);
+  }
+
+  .mensaje :global(.icono) {
+    flex: none;
+    margin-top: 0.15rem;
+    color: var(--acento);
+  }
+
+  .wa-dos {
+    display: inline-block;
+    margin-top: 0.8rem;
+    background: #25d366;
+  }
+
+  .wa-dos[hidden] {
+    display: none;
+  }
+
+  .wa-dos:hover {
+    background: #1ebe5b;
+  }
+
+  .tabla-caja {
+    margin-top: 1.4rem;
+    border-radius: 20px;
+    background: var(--superficie);
+    border: 1px solid var(--borde);
+    box-shadow: var(--sombra);
+    overflow: hidden;
+  }
+
+  .tabla {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  .tabla th,
+  .tabla td {
+    padding: 0.85rem 1rem;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--borde);
+    transition:
+      background-color 0.3s ease,
+      opacity 0.3s ease;
+  }
+
+  .tabla tfoot td {
+    border-bottom: 0;
+  }
+
+  .tabla tbody th {
+    width: 30%;
+    font-family: var(--fuente-ui);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--texto-suave);
+  }
+
+  .tabla tbody th :global(.icono) {
+    vertical-align: -3px;
+    margin-right: 0.2rem;
+    color: var(--acento);
+  }
+
+  .tabla thead th {
+    padding-top: 1.1rem;
+  }
+
+  .tabla-nombre {
+    display: block;
+    font-family: var(--fuente-titulos);
+    font-size: 1.3rem;
+    color: var(--titulo);
+  }
+
+  .sello {
+    display: inline-block;
+    margin-bottom: 0.3rem;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    font-family: var(--fuente-ui);
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    background: var(--chip);
+    color: var(--texto-suave);
+  }
+
+  .sello:empty {
+    visibility: hidden;
+  }
+
+  /* Columna recomendada */
+  .tabla [data-estado='recomendada'] {
+    background: color-mix(in srgb, var(--madera) 10%, var(--superficie));
+  }
+
+  .tabla th[data-estado='recomendada'] .sello {
+    background: var(--madera);
+    color: #fff;
+  }
+
+  .tabla th[data-estado='sirve'] .sello,
+  .tabla th[data-estado='ambas'] .sello {
+    background: color-mix(in srgb, var(--bosque-claro) 18%, var(--superficie));
+    color: var(--enlace);
+  }
+
+  /* Columna que no sirve: queda apagada */
+  .tabla td[data-estado='no-sirve'],
+  .tabla th[data-estado='no-sirve'] .tabla-nombre {
+    opacity: 0.45;
+  }
+
+  .tabla th[data-estado='no-sirve'] .sello {
+    background: none;
+    border: 1px solid var(--borde);
+  }
+
+  .precio {
+    font-family: var(--fuente-ui);
+    font-weight: 700;
+    color: var(--titulo);
+  }
+
+  .precio small {
+    font-weight: 500;
+    color: var(--texto-suave);
+  }
+
+  .camas {
+    margin: 0;
+    padding-left: 1rem;
+    font-size: 0.92rem;
+  }
+
+  .tabla-btn {
+    display: block;
+    text-align: center;
+    padding: 0.65rem 0.8rem;
+  }
+
+  .tabla-btn.apagado {
+    background: var(--chip);
+    color: var(--texto-suave);
+  }
+
+  @media (max-width: 600px) {
+    .tabla th,
+    .tabla td {
+      padding: 0.7rem 0.55rem;
+      font-size: 0.85rem;
+    }
+
+    .tabla tbody th {
+      width: 28%;
+      font-size: 0.75rem;
+    }
+
+    .tabla tbody th :global(.icono) {
+      display: none;
+    }
+
+    .tabla-nombre {
+      font-size: 1.05rem;
+    }
+
+    .sello {
+      font-size: 0.6rem;
+      padding: 0.12rem 0.45rem;
+    }
+
+    .camas {
+      font-size: 0.8rem;
+      padding-left: 0.85rem;
+    }
+
+    .precio small {
+      display: block;
+    }
+
+    .tabla-btn {
+      font-size: 0.85rem;
+      padding: 0.6rem 0.4rem;
+    }
+
+    .contador {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+</style>
