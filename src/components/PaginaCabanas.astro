@@ -7,6 +7,7 @@ import { url } from '../lib/url';
 import Icon from './Icon.astro';
 import CabanaDatos from './CabanaDatos.astro';
 import FotoAmpliable from './FotoAmpliable.astro';
+import ElegirCabana from './ElegirCabana.astro';
 import { fotosCabana } from '../data/fotos';
 
 interface Props {
@@ -71,6 +72,8 @@ const reservar = (id: string) => url(`${lang}/reservar/?cabana=${id}`);
     {cabanas.map((c) => <a href={`#${c.id}`}>{c.nombre[lang]}</a>)}
   </nav>
 </section>
+
+<ElegirCabana lang={lang} />
 
 {
   cabanas.map((c) => (
